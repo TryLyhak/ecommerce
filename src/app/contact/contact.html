@@ -1,85 +1,85 @@
-<div class="contact-page container py-5">
-  <h2 class="text-center mb-4">Contact Us</h2>
-  <p class="text-center mb-5 text-muted">
-    Have questions? We’re here to help. Reach out to us using the form or
-    details below.
-  </p>
+<main class="contact-page container py-4 py-lg-5">
+  <header class="contact-hero">
+    <p class="eyebrow">We would love to hear from you</p>
+    <h1>Let’s start a <em>conversation.</em></h1>
+    <p class="hero-copy">
+      Have a question about an order, a product, or just want to say hello?
+      Our team is here to help.
+    </p>
+  </header>
 
-  <div class="row g-4">
-    <!-- Contact Info -->
-    <div class="col-md-5">
-      <div class="card shadow-sm p-4 h-100">
-        <h4 class="mb-4">Our Information</h4>
-        <p>
-          <i class="bi bi-geo-alt-fill text-primary me-2"></i> 123 Main Street,
-          Phnom Penh
-        </p>
-        <p>
-          <i class="bi bi-telephone-fill text-primary me-2"></i> +855 12 345 678
-        </p>
-        <p>
-          <i class="bi bi-envelope-fill text-primary me-2"></i> info@example.com
-        </p>
-        <hr />
-        <h5 class="mb-3">Follow Us</h5>
-        <a href="#" class="me-3 text-primary fs-4"
-          ><i class="bi bi-facebook"></i
-        ></a>
-        <a href="#" class="me-3 text-info fs-4"
-          ><i class="bi bi-twitter"></i
-        ></a>
-        <a href="#" class="text-danger fs-4"><i class="bi bi-instagram"></i></a>
+  <div class="contact-layout">
+    <section class="info-card">
+      <div class="info-card-top">
+        <p class="eyebrow">Get in touch</p>
+        <h2>We’re here for you.</h2>
+        <p>Drop us a line and we’ll get back to you within one business day.</p>
       </div>
-    </div>
 
-    <!-- Contact Form -->
-    <div class="col-md-7">
-      <div class="card shadow-sm p-4 h-100">
-        <h4 class="mb-4">Send a Message</h4>
-        <form>
-          <div class="mb-3">
-            <label for="name" class="form-label">Your Name</label>
-            <input
-              type="text"
-              class="form-control"
-              id="name"
-              placeholder="Enter your name"
-            />
-          </div>
-          <div class="mb-3">
-            <label for="email" class="form-label">Your Email</label>
-            <input
-              type="email"
-              class="form-control"
-              id="email"
-              placeholder="Enter your email"
-            />
-          </div>
-          <div class="mb-3">
-            <label for="message" class="form-label">Message</label>
-            <textarea
-              class="form-control"
-              id="message"
-              rows="5"
-              placeholder="Write your message"
-            ></textarea>
-          </div>
-          <button type="submit" class="btn btn-primary px-4">Send</button>
-        </form>
+      <div class="contact-list">
+        <a href="https://maps.google.com/?q=Phnom+Penh" class="contact-item">
+          <span class="contact-icon"><i class="bi bi-geo-alt"></i></span>
+          <span><small>Visit us</small><strong>Khan Kombul, Phnom Penh</strong></span>
+        </a>
+        <a href="tel:+85512345678" class="contact-item">
+          <span class="contact-icon"><i class="bi bi-telephone"></i></span>
+          <span><small>Call us</small><strong>+855 612 420 10</strong></span>
+        </a>
+        <a href="mailto:trylyhak061@gmail.com" class="contact-item">
+          <span class="contact-icon"><i class="bi bi-envelope"></i></span>
+          <span><small>Email us</small><strong>trylyhak061@gmail.com</strong></span>
+        </a>
       </div>
-    </div>
+
+      <div class="social-links">
+        <span>Follow along</span>
+        <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+        <a href="#" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
+        <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+      </div>
+    </section>
+
+    <section class="form-card">
+      <div class="form-heading">
+        <p class="eyebrow">Send a message</p>
+        <h2>Tell us what’s on your mind.</h2>
+      </div>
+      <form (submit)="$event.preventDefault()">
+        <div class="form-row">
+          <div class="field">
+            <label for="name">Your name</label>
+            <input type="text" id="name" placeholder="Jane Smith" required />
+          </div>
+          <div class="field">
+            <label for="email">Email address</label>
+            <input type="email" id="email" placeholder="jane@example.com" required />
+          </div>
+        </div>
+        <div class="field">
+          <label for="message">Message</label>
+          <textarea id="message" rows="5" placeholder="How can we help?" required></textarea>
+        </div>
+        <button type="submit" class="send-button">
+          Send message <i class="bi bi-arrow-up-right"></i>
+        </button>
+      </form>
+    </section>
   </div>
 
-  <!-- Google Map -->
-  <div class="map-container mt-5">
+  <section class="map-container">
+    <div class="map-heading">
+      <p class="eyebrow">Find us</p>
+      <h2>Come say hello.</h2>
+    </div>
     <iframe
       src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.476123022045!2d104.92310327481727!3d11.570327288640342!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3109514d5d3e2c13%3A0xd35b548b8a9f5d7a!2sPhnom%20Penh!5e0!3m2!1sen!2skh!4v1675862345678!5m2!1sen!2skh"
       width="100%"
       height="350"
       style="border: 0"
+      title="Map showing our Phnom Penh location"
       allowfullscreen=""
       loading="lazy"
     >
     </iframe>
-  </div>
-</div>
+  </section>
+</main>

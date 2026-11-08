@@ -1,5 +1,93 @@
-.container-sm::after {
-  content: "";
-  display: table;
-  clear: both;
+.home-page {
+  max-width: 1240px;
+  animation: soft-fade 0.7s ease-out both;
+}
+
+.section-heading {
+  align-items: end;
+  display: flex;
+  justify-content: space-between;
+  margin: 3.5rem 0 1.5rem;
+  animation: soft-rise 0.65s 0.15s ease-out both;
+}
+
+.eyebrow {
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  margin: 0 0 0.45rem;
+  text-transform: uppercase;
+}
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin: 0;
+}
+
+h1 em {
+  color: var(--accent);
+  font-style: normal;
+}
+
+.view-all {
+  color: var(--ink);
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.view-all i {
+  color: var(--accent);
+  margin-left: 0.35rem;
+  transition: transform 0.2s ease;
+}
+
+.view-all:hover {
+  color: var(--accent);
+}
+
+.view-all:hover i {
+  transform: translate(3px, -3px);
+}
+
+.product-grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.product-grid app-product-card {
+  animation: soft-rise 0.55s ease-out both;
+}
+
+.product-grid app-product-card:nth-child(2) {
+  animation-delay: 0.08s;
+}
+
+.product-grid app-product-card:nth-child(3) {
+  animation-delay: 0.16s;
+}
+
+.product-grid app-product-card:nth-child(4) {
+  animation-delay: 0.24s;
+}
+
+@media (max-width: 991px) {
+  .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 575px) {
+  .section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .product-grid {
+    grid-template-columns: 1fr;
+  }
 }

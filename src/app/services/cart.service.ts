@@ -4,11 +4,12 @@ import { Injectable, signal } from '@angular/core';
   providedIn: 'root',
 })
 export class CartService {
-  updateCart(cartItems: any[]) {
-    throw new Error('Method not implemented.');
+  updateCart(cartItems: any[]): void {
+    this.saveCart(cartItems);
   }
-  removeById(id: any): void {
-    throw new Error('Method not implemented.');
+
+  removeById(id: number): void {
+    this.saveCart(this.cart().filter((item) => item.id !== id));
   }
   private storageKey = 'myCart';
 
@@ -36,12 +37,20 @@ export class CartService {
 
   // Cart count
   getCartCount() {
-    return this.cart().length;
+    return this.cart().reduce((count, item) => count + (item.quantity || 1), 0);
   }
 
   // Add item
   addToCart(item: any) {
-    const items = [...this.cart(), item];
+    const items = [...this.cart()];
+    const existing = items.find((cartItem) => cartItem.id === item.id);
+
+    if (existing) {
+      existing.quantity = (existing.quantity || 1) + 1;
+    } else {
+      items.push({ ...item, quantity: item.quantity || 1 });
+    }
+
     this.saveCart(items);
   }
 
@@ -56,7 +65,11 @@ export class CartService {
   updateQuantity(index: number, quantity: number) {
     const items = [...this.cart()];
     if (items[index]) {
-      items[index].quantity = quantity;
+      if (quantity <= 0) {
+        items.splice(index, 1);
+      } else {
+        items[index].quantity = Math.floor(quantity);
+      }
       this.saveCart(items);
     }
   }

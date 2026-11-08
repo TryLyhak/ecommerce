@@ -14,11 +14,8 @@ import { RouterLink } from '@angular/router';
 export class ProductCard {
   readonly product = input<any>();
   private cartService = inject(CartService);
+
   addToCart(): void {
     this.cartService.addToCart(this.product());
-    localStorage.setItem('cartItems', JSON.stringify(this.cartItems));
-  }
-  cartItems(cartItems: any): any {
-    throw new Error('Method not implemented.');
   }
 }

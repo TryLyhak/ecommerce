@@ -1,0 +1,52 @@
+.shop-hero {
+  border-radius: 18px;
+  overflow: hidden;
+  animation: soft-rise 0.75s 0.08s ease-out both;
+}
+
+.shop-hero .carousel-item {
+  height: clamp(320px, 42vw, 500px);
+}
+
+.shop-hero img {
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.7);
+  transition: transform 1.2s ease;
+}
+
+.shop-hero .carousel-item.active img {
+  transform: scale(1.03);
+}
+
+.shop-hero .carousel-caption {
+  bottom: 18%;
+  left: 10%;
+  max-width: 520px;
+  right: auto;
+  text-align: left;
+}
+
+.shop-hero h5 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.4rem, 5vw, 4.5rem);
+  line-height: 0.98;
+}
+
+.shop-hero h5 em {
+  color: #ffc6b8;
+  font-style: normal;
+}
+
+.shop-hero p:not(.hero-kicker) {
+  font-size: 1rem;
+  max-width: 360px;
+}
+
+.hero-kicker {
+  color: #ffc6b8;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}

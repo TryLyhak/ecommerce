@@ -1,8 +1,27 @@
-<div class="container-sm mt-2">
+<main class="products-page container py-4 py-lg-5">
+  <div class="products-heading">
+    <div>
+      <p class="eyebrow">Explore the collection</p>
+      <h1>{{ searchTerm ? 'Search results' : 'All products' }}</h1>
+      @if (searchTerm) {
+        <p class="results-copy">Showing results for <strong>"{{ searchTerm }}"</strong></p>
+      }
+    </div>
+    <span class="result-count">{{ products.length }} items</span>
+  </div>
 
+  @if (products.length) {
+  <div class="product-grid">
   @for (item of products; track item) {
-  <a [routerLink]="['/product', item.id]" class="text-decoration-none"></a>
   <app-product-card [product]="item"></app-product-card>
   }
-  <!-- <div class="clearfix"></div> -->
-</div>
+  </div>
+  } @else {
+    <section class="no-results">
+      <div class="empty-search-icon"><i class="bi bi-search"></i></div>
+      <h2>No products found</h2>
+      <p>Try searching for another product, category, or keyword.</p>
+      <a routerLink="/product-page" class="clear-results">View all products</a>
+    </section>
+  }
+</main>

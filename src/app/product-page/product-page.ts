@@ -28,21 +28,44 @@ export class ProductPage {
   //   });
   // }
   products: any[] = [];
+  allProducts: any[] = [];
+  searchTerm = '';
 
-  constructor(private productService: ProductService) {}
+  constructor(
+    private productService: ProductService,
+    private route: ActivatedRoute,
+  ) {}
 
   ngOnInit(): void {
+    this.route.queryParamMap.subscribe((params) => {
+      this.searchTerm = params.get('search')?.trim() ?? '';
+      this.filterProducts();
+    });
     this.loadProducts();
   }
 
   loadProducts(): void {
     this.productService.getProducts().subscribe({
       next: (data) => {
-        this.products = data;
+        this.allProducts = data;
+        this.filterProducts();
       },
       error: (err) => {
         console.error('Error loading products:', err);
       },
     });
+  }
+
+  private filterProducts(): void {
+    const term = this.searchTerm.toLowerCase();
+    this.products = !term
+      ? this.allProducts
+      : this.allProducts.filter((product) =>
+          [product.title, product.category, product.description]
+            .filter(Boolean)
+            .join(' ')
+            .toLowerCase()
+            .includes(term),
+        );
   }
 }

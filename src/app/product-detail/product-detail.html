@@ -1,17 +1,50 @@
-<div class="container mt-4" *ngIf="product">
-  <div class="card p-3 shadow">
-    <div class="row">
-      <div class="col-md-5 text-center">
-        <img [src]="product.image" class="img-fluid rounded" alt="Product" />
+<main class="detail-page container py-4 py-lg-5" *ngIf="product; else loadingProduct">
+  <a routerLink="/product-page" class="back-link">
+    <i class="bi bi-arrow-left"></i> Back to products
+  </a>
+
+  <section class="detail-card">
+    <div class="product-visual">
+      <span class="category-badge">{{ product.category }}</span>
+      <img [src]="product.image" [alt]="product.title" class="product-image" />
+      <div class="image-glow"></div>
+    </div>
+
+    <div class="product-info">
+      <p class="eyebrow">Scott. collection</p>
+      <h1>{{ product.title }}</h1>
+      <div class="rating" aria-label="5 out of 5 stars">
+        <span>★★★★★</span>
+        <small> Loved by our customers</small>
       </div>
-      <div class="col-md-7">
-        <h2>{{ product.title }}</h2>
-        <p class="text-muted">{{ product.category }}</p>
-        <h3 class="text-success">{{ product.price | currency }}</h3>
-         <h3 class="text-success">{{ product.price | toKHR }}</h3>
-        <p>{{ product.description }}</p>
-        <button class="btn btn-warning mt-2" (click)="addToCart">Add to Cart 🛒</button>
+
+      <div class="price-block">
+        <span class="price">{{ product.price | currency }}</span>
+        <span class="price-khr">{{ product.price | toKHR }}</span>
+      </div>
+
+      <p class="description">{{ product.description }}</p>
+
+      <div class="purchase-note">
+        <i class="bi bi-box-seam"></i>
+        <span><strong>Ready to ship</strong><br />Packed with care from Phnom Penh</span>
+      </div>
+
+      <button class="add-button" (click)="addProductToCart()">
+        Add to cart <i class="bi bi-bag-plus"></i>
+      </button>
+      <p class="secure-note"><i class="bi bi-shield-check"></i> Secure checkout · Easy returns</p>
+    </div>
+  </section>
+</main>
+
+<ng-template #loadingProduct>
+  <main class="detail-page container py-5">
+    <div class="loading-card">
+      <div class="loading-image"></div>
+      <div class="loading-lines">
+        <span></span><span></span><span></span>
       </div>
     </div>
-  </div>
-</div>
+  </main>
+</ng-template>

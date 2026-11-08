@@ -1,9 +1,17 @@
-<div class="container-sm mt-2">
+<main class="home-page container py-4 py-lg-5">
   <app-slider></app-slider>
 
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">Curated for you</p>
+      <h1>Find something <em>beautiful.</em></h1>
+    </div>
+    <a routerLink="/product-page" class="view-all">View all products <i class="bi bi-arrow-up-right"></i></a>
+  </div>
+
+  <div class="product-grid">
   @for (item of products; track item) {
-  <!-- <a [routerLink]="['/product', item.id]"></a> -->
   <app-product-card [product]="item"></app-product-card>
   }
-  <!-- <div class="clearfix"></div> -->
-</div>
+  </div>
+  </main>
