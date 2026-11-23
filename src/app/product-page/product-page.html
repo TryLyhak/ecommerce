@@ -10,6 +10,71 @@
     <span class="result-count">{{ total() }} items</span>
   </div>
 
+    <!-- Filters: category and sorting -->
+  <div class="filters-bar">
+    <label>
+      <span>Category</span>
+      <select (change)="onCategoryChange($event)">
+        <option value="" [selected]="selectedCategory() === ''">All categories</option>
+        @for (category of categories(); track category.id) {
+          <option [value]="category.slug" [selected]="selectedCategory() === category.slug">
+            {{ category.name }}
+          </option>
+          @for (child of category.children ?? []; track child.id) {
+            <option [value]="child.slug" [selected]="selectedCategory() === child.slug">
+              &nbsp;&nbsp;— {{ child.name }}
+            </option>
+          }
+        }
+      </select>
+    </label>
+
+        <div class="price-filter">
+      <label>
+        <span>Min price ($)</span>
+        <input
+          #minBox
+          type="number"
+          min="0"
+          placeholder="0"
+          [value]="minPrice()"
+          (keyup.enter)="applyPrice(minBox.value, maxBox.value)"
+        />
+      </label>
+      <label>
+        <span>Max price ($)</span>
+        <input
+          #maxBox
+          type="number"
+          min="0"
+          placeholder="Any"
+          [value]="maxPrice()"
+          (keyup.enter)="applyPrice(minBox.value, maxBox.value)"
+        />
+      </label>
+      <button type="button" class="apply-price" (click)="applyPrice(minBox.value, maxBox.value)">
+        Apply
+      </button>
+    </div>
+
+    <label>
+      <span>Sort by</span>
+      <select (change)="onSortChange($event)">
+        <option value="newest" [selected]="selectedSort() === 'newest'">Newest</option>
+        <option value="price_asc" [selected]="selectedSort() === 'price_asc'">Price: low to high</option>
+        <option value="price_desc" [selected]="selectedSort() === 'price_desc'">Price: high to low</option>
+      </select>
+    </label>
+
+      @if (selectedCategory() || selectedSort() !== 'newest' || minPrice() || maxPrice())  {
+      <button type="button" class="clear-filters" (click)="clearFilters()">Clear filters</button>
+    }
+  </div>
+
+    @if (priceError()) {
+    <p class="filter-error">{{ priceError() }}</p>
+  }
+
   @if (loading()) {
     <p class="text-center py-5">Loading products...</p>
   } @else if (errorMessage()) {

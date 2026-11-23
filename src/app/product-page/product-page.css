@@ -23,3 +23,105 @@
   cursor: not-allowed;
   opacity: 0.6;
 }
+
+
+/* Filter bar: category and sort dropdowns */
+.filters-bar {
+  align-items: flex-end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+.filters-bar label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.filters-bar label span {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.filters-bar select {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  font-size: 0.85rem;
+  min-width: 180px;
+  padding: 0.6rem 0.75rem;
+}
+
+.clear-filters {
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.62rem 0.9rem;
+}
+
+.clear-filters:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Price filter boxes */
+.price-filter {
+  align-items: flex-end;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.price-filter label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.price-filter label span {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.price-filter input {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  font-size: 0.85rem;
+  padding: 0.6rem 0.75rem;
+  width: 110px;
+}
+
+.apply-price {
+  background: var(--ink);
+  border: 0;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.68rem 1rem;
+}
+
+.apply-price:hover {
+  background: var(--accent);
+}
+
+.filter-error {
+  color: #c0392b;
+  font-size: 0.85rem;
+  margin: -0.75rem 0 1.25rem;
+}
