@@ -2,37 +2,20 @@
   <div class="products-heading">
     <div>
       <p class="eyebrow">Explore the collection</p>
-      <h1>{{ searchTerm() ? 'Search results' : 'All products' }}</h1>
-      @if (searchTerm()) {
-        <p class="results-copy">Showing results for <strong>"{{ searchTerm() }}"</strong></p>
+      <h1>{{ searchTerm ? 'Search results' : 'All products' }}</h1>
+      @if (searchTerm) {
+        <p class="results-copy">Showing results for <strong>"{{ searchTerm }}"</strong></p>
       }
     </div>
-    <span class="result-count">{{ total() }} items</span>
+    <span class="result-count">{{ products.length }} items</span>
   </div>
 
-  @if (loading()) {
-    <p class="text-center py-5">Loading products...</p>
-  } @else if (errorMessage()) {
-    <p class="text-center py-5 text-danger">{{ errorMessage() }}</p>
-  } @else if (products().length) {
-    <div class="product-grid">
-      @for (item of products(); track item.id) {
-        <app-product-card [product]="item"></app-product-card>
-      }
-    </div>
-
-    <!-- Page buttons: only shown when there is more than one page -->
-    @if (lastPage() > 1) {
-      <nav class="pagination-bar">
-        <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1">
-          <i class="bi bi-arrow-left"></i> Previous
-        </button>
-        <span>Page {{ currentPage() }} of {{ lastPage() }}</span>
-        <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === lastPage()">
-          Next <i class="bi bi-arrow-right"></i>
-        </button>
-      </nav>
-    }
+  @if (products.length) {
+  <div class="product-grid">
+  @for (item of products; track item) {
+  <app-product-card [product]="item"></app-product-card>
+  }
+  </div>
   } @else {
     <section class="no-results">
       <div class="empty-search-icon"><i class="bi bi-search"></i></div>

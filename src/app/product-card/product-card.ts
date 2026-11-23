@@ -4,7 +4,6 @@ import { CurrencyPipe } from '@angular/common';
 import { toKHRPipe } from '../custom-pipe/to-khr-pipe';
 import { CartService } from '../services/cart.service';
 import { RouterLink } from '@angular/router';
-import { Product } from '../models/product.model';
 @Component({
   selector: 'app-product-card',
   standalone: true,
@@ -13,18 +12,10 @@ import { Product } from '../models/product.model';
   styleUrls: ['./product-card.css'],
 })
 export class ProductCard {
-  readonly product = input.required<Product>();
+  readonly product = input<any>();
   private cartService = inject(CartService);
 
   addToCart(): void {
-    const product = this.product();
-    this.cartService.addToCart({
-      id: product.id,
-      title: product.name,
-      image: product.main_image,
-      price: product.current_price,
-      category: product.category?.name,
-      description: product.description,
-    });
+    this.cartService.addToCart(this.product());
   }
 }
