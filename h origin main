@@ -1,0 +1,46 @@
+[33mcommit cd62aec5af549d47c98a63c4382ac1cde832fbdb[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: TryLyhak <trylyhak061@gmail.com>
+Date:   Mon Nov 23 15:40:17 2026 +0700
+
+    Phase 3: categories, products, images and public catalog API
+
+ angular.json                                |     8 [32m+[m[31m-[m
+ dist/ng_web/3rdpartylicenses.txt            |   408 [31m-[m
+ dist/ng_web/browser/app.css.map             |     7 [32m+[m
+ dist/ng_web/browser/cart.css.map            |     7 [32m+[m
+ dist/ng_web/browser/contact.css.map         |     7 [32m+[m
+ dist/ng_web/browser/footer.css.map          |     7 [32m+[m
+ dist/ng_web/browser/home.css.map            |     7 [32m+[m
+ dist/ng_web/browser/index.html              |    18 [32m+[m[31m-[m
+ dist/ng_web/browser/main-WL3WI62Y.js        |    70 [31m-[m
+ dist/ng_web/browser/main.js                 | 49774 [32m++++++++++++++++++++++++++[m
+ dist/ng_web/browser/main.js.map             |     1 [32m+[m
+ dist/ng_web/browser/navbar.css.map          |     7 [32m+[m
+ dist/ng_web/browser/polyfills-B6TNHZQ6.js   |     2 [31m-[m
+ dist/ng_web/browser/polyfills.js            |  2389 [32m++[m
+ dist/ng_web/browser/polyfills.js.map        |     1 [32m+[m
+ dist/ng_web/browser/product-card.css.map    |     7 [32m+[m
+ dist/ng_web/browser/product-detail.css.map  |     7 [32m+[m
+ dist/ng_web/browser/product-page.css.map    |     7 [32m+[m
+ dist/ng_web/browser/slider.css.map          |     7 [32m+[m
+ dist/ng_web/browser/styles-NF2NIBGS.css     |     1 [31m-[m
+ dist/ng_web/browser/styles.css              |    77 [32m+[m
+ dist/ng_web/browser/styles.css.map          |     7 [32m+[m
+ src/app/app.routes.ts                       |     2 [32m+[m[31m-[m
+ src/app/app.ts                              |    10 [32m+[m[31m-[m
+ src/app/home/home.html                      |    14 [32m+[m[31m-[m
+ src/app/home/home.ts                        |    48 [32m+[m[31m-[m
+ src/app/models/product.model.ts             |    69 [32m+[m
+ src/app/product-card/product-card.css       |   128 [32m+[m[31m-[m
+ src/app/product-card/product-card.html      |    38 [32m+[m[31m-[m
+ src/app/product-card/product-card.ts        |    13 [32m+[m[31m-[m
+ src/app/product-detail/product-detail.css   |   279 [32m+[m[31m-[m
+ src/app/product-detail/product-detail.html  |   108 [32m+[m[31m-[m
+ src/app/product-detail/product-detail.ts    |    99 [32m+[m[31m-[m
+ src/app/product-page/product-page.css       |   117 [32m+[m[31m-[m
+ src/app/product-page/product-page.html      |    39 [32m+[m[31m-[m
+ src/app/product-page/product-page.ts        |   102 [32m+[m[31m-[m
+ src/app/services/catalog.service.ts         |    55 [32m+[m
+ src/environments/environment.development.ts |     5 [32m+[m
+ src/environments/environment.ts             |     5 [32m+[m
+ 39 files changed, 52820 insertions(+), 1137 deletions(-)
