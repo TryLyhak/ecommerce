@@ -1,44 +1,82 @@
-<main class="detail-page container py-4 py-lg-5" *ngIf="product; else loadingProduct">
-  <a routerLink="/product-page" class="back-link">
-    <i class="bi bi-arrow-left"></i> Back to products
-  </a>
+@if (product(); as item) {
+  <main class="detail-page container py-4 py-lg-5">
+    <a routerLink="/product-page" class="back-link">
+      <i class="bi bi-arrow-left"></i> Back to products
+    </a>
 
-  <section class="detail-card">
-    <div class="product-visual">
-      <span class="category-badge">{{ product.category }}</span>
-      <img [src]="product.image" [alt]="product.title" class="product-image" />
-      <div class="image-glow"></div>
-    </div>
-
-    <div class="product-info">
-      <p class="eyebrow">Scott. collection</p>
-      <h1>{{ product.title }}</h1>
-      <div class="rating" aria-label="5 out of 5 stars">
-        <span>★★★★★</span>
-        <small> Loved by our customers</small>
+    <section class="detail-card">
+      <div class="product-visual">
+        @if (item.category) {
+          <span class="category-badge">{{ item.category.name }}</span>
+        }
+        @if (item.main_image) {
+          <img [src]="item.main_image" [alt]="item.name" class="product-image" />
+        } @else {
+          <div class="no-image">No image yet</div>
+        }
+        <div class="image-glow"></div>
       </div>
 
-      <div class="price-block">
-        <span class="price">{{ product.price | currency }}</span>
-        <span class="price-khr">{{ product.price | toKHR }}</span>
+      <div class="product-info">
+        <p class="eyebrow">{{ item.brand || 'Scott. collection' }}</p>
+        <h1>{{ item.name }}</h1>
+
+        <div class="price-block">
+          <span class="price">{{ item.current_price | currency }}</span>
+          @if (item.on_sale) {
+            <span class="old-price">{{ item.price | currency }}</span>
+          }
+          <span class="price-khr">{{ item.current_price | toKHR }}</span>
+        </div>
+
+        <p class="description">{{ item.description }}</p>
+
+        <div class="purchase-note">
+          <i class="bi bi-box-seam"></i>
+          <span>
+            @switch (item.stock_status) {
+              @case ('in_stock') {
+                <strong>In stock</strong><br />Packed with care from Phnom Penh
+              }
+              @case ('low_stock') {
+                <strong>Only a few left</strong><br />Order soon before it sells out
+              }
+              @default {
+                <strong>Out of stock</strong><br />This item is not available right now
+              }
+            }
+          </span>
+        </div>
+
+        @if (item.stock_status === 'out_of_stock') {
+          <button class="add-button" disabled>Out of stock</button>
+        } @else {
+          <button class="add-button" (click)="addProductToCart()">
+            Add to cart <i class="bi bi-bag-plus"></i>
+          </button>
+        }
+        <p class="secure-note"><i class="bi bi-shield-check"></i> Secure checkout · Easy returns</p>
       </div>
+    </section>
 
-      <p class="description">{{ product.description }}</p>
-
-      <div class="purchase-note">
-        <i class="bi bi-box-seam"></i>
-        <span><strong>Ready to ship</strong><br />Packed with care from Phnom Penh</span>
-      </div>
-
-      <button class="add-button" (click)="addProductToCart()">
-        Add to cart <i class="bi bi-bag-plus"></i>
-      </button>
-      <p class="secure-note"><i class="bi bi-shield-check"></i> Secure checkout · Easy returns</p>
-    </div>
-  </section>
-</main>
-
-<ng-template #loadingProduct>
+    @if (related().length) {
+      <section class="related-section">
+        <h2>You may also like</h2>
+        <div class="related-grid">
+          @for (relatedItem of related(); track relatedItem.id) {
+            <app-product-card [product]="relatedItem"></app-product-card>
+          }
+        </div>
+      </section>
+    }
+  </main>
+} @else if (notFound()) {
+  <main class="detail-page container py-5 text-center">
+    <h2>Product not found</h2>
+    <p>This product does not exist or is no longer available.</p>
+    <a routerLink="/product-page" class="back-link">View all products</a>
+  </main>
+} @else {
   <main class="detail-page container py-5">
     <div class="loading-card">
       <div class="loading-image"></div>
@@ -47,4 +85,4 @@
       </div>
     </div>
   </main>
-</ng-template>
+}
