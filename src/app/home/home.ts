@@ -1,9 +1,8 @@
-import { Component, inject, signal } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Component } from '@angular/core';
 import { Slider } from '../slider/slider';
 import { ProductCard } from '../product-card/product-card';
-import { CatalogService } from '../services/catalog.service';
-import { Product } from '../models/product.model';
+import { RouterLink, RouterModule } from '@angular/router';
+import { ProductService } from '../services/product.service';
 
 @Component({
   selector: 'app-home',
@@ -12,27 +11,30 @@ import { Product } from '../models/product.model';
   styleUrl: './home.css',
 })
 export class Home {
-  private catalog = inject(CatalogService);
+  products: any[] = [];
+  loding: boolean | undefined;
 
-  // Signals: the template re-renders automatically when they change
-  products = signal<Product[]>([]);
-  loading = signal(true);
-  errorMessage = signal('');
+  constructor(private productService: ProductService) {}
 
-  ngOnInit(): void {
-    // The home page shows the 8 newest products
-    this.catalog.getProducts({ per_page: 8, sort: 'newest' }).subscribe({
-      next: (response) => {
-        this.products.set(response.data);
-        this.loading.set(false);
-      },
-      error: (err) => {
-        console.error('Error loading products:', err);
-        this.errorMessage.set(
-          'Could not load products. Please try again later.',
-        );
-        this.loading.set(false);
-      },
+  ngOnInit() {
+    this.productService.getProducts().subscribe((data) => {
+      this.products = data;
+      this.loding = false;
     });
   }
 }
+
+// ngOnInit(): void {
+//   this.loadProducts();
+// }
+
+// loadProducts(): void {
+//   this.productService.getProducts().subscribe({
+//     next: (data) => {
+//       this.products = data;
+//     },
+//     error: (err) => {
+//       console.error('Error loading products:', err);
+//     },
+//   });
+// }

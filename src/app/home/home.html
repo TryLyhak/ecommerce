@@ -9,15 +9,9 @@
     <a routerLink="/product-page" class="view-all">View all products <i class="bi bi-arrow-up-right"></i></a>
   </div>
 
-    @if (loading()) {
-    <p class="text-center py-5">Loading products...</p>
-  } @else if (errorMessage()) {
-    <p class="text-center py-5 text-danger">{{ errorMessage() }}</p>
-  } @else {
-    <div class="product-grid">
-      @for (item of products(); track item.id) {
-        <app-product-card [product]="item"></app-product-card>
-      }
-    </div>
+  <div class="product-grid">
+  @for (item of products; track item) {
+  <app-product-card [product]="item"></app-product-card>
   }
+  </div>
   </main>

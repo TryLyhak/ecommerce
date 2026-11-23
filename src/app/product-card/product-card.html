@@ -1,37 +1,21 @@
+<!-- child -->
 <div class="product-card">
   <div class="card h-100">
-    @if (product().category) {
-      <div class="category-badge">{{ product().category?.name }}</div>
-    }
-
-    <a [routerLink]="['/product', product().slug]">
-      @if (product().main_image) {
-        <img [src]="product().main_image" class="card-img-top pro-img" [alt]="product().name" />
-      } @else {
-        <div class="no-image">No image</div>
-      }
+    <div class="category-badge">{{ product().category }}</div>
+    <a [routerLink]="['/product', product().id]">
+      <img [src]="product().image" class="card-img-top pro-img" alt="Product" />
     </a>
 
     <div class="card-body">
-      <h5 class="card-title product-title">{{ product().name }}</h5>
-
+      <h5 class="card-title product-title">{{ product().title }}</h5>
       <div class="price-row">
-        <span class="price">{{ product().current_price | currency }}</span>
-        @if (product().on_sale) {
-          <span class="old-price">{{ product().price | currency }}</span>
-        }
-        <span class="price-khr">{{ product().current_price | toKHR }}</span>
+        <span class="price">{{ product().price | currency }}</span>
+        <span class="price-khr">{{ product().price | toKHR }}</span>
       </div>
-
       <h6 class="card-title product-description">{{ product().description }}</h6>
-
-      @if (product().stock_status === 'out_of_stock') {
-        <button class="add-button" disabled>Out of stock</button>
-      } @else {
-        <button class="add-button" (click)="addToCart()">
-          Add to cart <i class="bi bi-arrow-right"></i>
-        </button>
-      }
+      <button class="add-button" (click)="addToCart()">
+        Add to cart <i class="bi bi-arrow-right"></i>
+      </button>
     </div>
   </div>
 </div>

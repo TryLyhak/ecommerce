@@ -1,25 +1,115 @@
-/* Original price shown struck through when a product is on sale */
-.old-price {
-  color: var(--muted);
-  font-size: 0.8rem;
-  text-decoration: line-through;
-}
-
-/* Placeholder when a product has no image yet */
-.no-image {
-  align-items: center;
-  background: #f4f1eb;
-  color: var(--muted);
-  display: flex;
-  font-size: 0.8rem;
+.pro-img {
   height: 220px;
-  justify-content: center;
+  width: 100%;
+  object-fit: contain;
+  padding: 1.5rem;
+  background: #f4f1eb;
+  transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
-/* Disabled button for out-of-stock products */
-.add-button:disabled {
-  background: var(--muted);
-  box-shadow: none;
-  cursor: not-allowed;
-  transform: none;
+.pro-img:hover {
+  transform: scale(1.06);
+}
+
+.product-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 1; /* Show 1 line */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.55rem;
+}
+
+.product-description {
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* Show up to 3 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--muted);
+  font-size: 0.78rem;
+  margin-bottom: 1rem;
+  min-height: 48px;
+}
+
+.category-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 10;
+  background: white;
+  border-radius: 999px;
+  color: var(--accent);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 0.4rem 0.65rem;
+  text-transform: uppercase;
+}
+
+.card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 8px 22px rgb(23 32 51 / 0.04);
+  overflow: hidden;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card:hover {
+  box-shadow: 0 14px 30px rgb(23 32 51 / 0.1);
+  transform: translateY(-4px);
+}
+
+.card-body {
+  padding: 1.15rem;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.price-row {
+  align-items: baseline;
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.price {
+  color: var(--accent);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.price-khr {
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.add-button {
+  background: var(--ink);
+  border: 0;
+  border-radius: 8px;
+  color: white;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.72rem 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  width: 100%;
+}
+
+.add-button:hover {
+  background: var(--accent);
+  box-shadow: 0 6px 14px rgb(231 111 81 / 0.25);
+  transform: translateY(-2px);
 }
