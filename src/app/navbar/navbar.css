@@ -183,3 +183,50 @@
     justify-content: center;
   }
 }
+
+/* Login / Register / Logout area */
+.auth-actions {
+  align-items: center;
+  display: flex;
+  gap: 0.6rem;
+  margin-left: 0.75rem;
+}
+
+.user-name {
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 700;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.auth-button {
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.5rem 0.85rem;
+  text-decoration: none;
+}
+
+.auth-button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.auth-button-primary {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: white;
+}
+
+.auth-button-primary:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}

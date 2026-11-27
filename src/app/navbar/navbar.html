@@ -46,6 +46,17 @@
         <span class="cart-count">{{ cartCount() }}</span>
       </a>
     </form>
+        <div class="auth-actions">
+      @if (auth.isLoggedIn()) {
+        <span class="user-name">
+          <i class="bi bi-person-circle me-1"></i>{{ auth.user()?.name ?? 'Account' }}
+        </span>
+        <button type="button" class="auth-button" (click)="logout()">Logout</button>
+      } @else {
+        <a routerLink="/login" class="auth-button">Login</a>
+        <a routerLink="/register" class="auth-button auth-button-primary">Register</a>
+      }
+    </div>
   </div>
   </div>
 </nav>
