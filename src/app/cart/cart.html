@@ -10,80 +10,146 @@
     </a>
   </div>
 
-  <div *ngIf="cartItems.length > 0; else emptyCart" class="cart-layout">
-    <section class="items-panel">
-      <div class="items-toolbar">
-        <label class="select-control">
-          <input
-            type="checkbox"
-            [(ngModel)]="selectAllChecked"
-            (change)="toggleSelectAll()"
-          />
-          <span>Select all items</span>
-        </label>
-        <button type="button" class="clear-link" (click)="clearCart()">
-          Clear cart
-        </button>
-      </div>
-
-      <article class="cart-item" *ngFor="let item of cartItems; let i = index">
-        <input
-          class="item-check"
-          type="checkbox"
-          [(ngModel)]="item.selected"
-          (change)="onItemSelectionChange()"
-          [attr.aria-label]="'Select ' + item.title"
-        />
-        <img [src]="item.image" [alt]="item.title" class="item-image" />
-        <div class="item-details">
-          <span class="item-category">{{ item.category }}</span>
-          <h2>{{ item.title }}</h2>
-          <p>{{ item.price | currency }} each</p>
+  @if (store.loading()) {
+    <div class="cart-loading" role="status" aria-label="Loading your cart" aria-busy="true">
+      <section class="cart-loading-items">
+        @for (row of loadingRows; track row) {
+          <div class="cart-loading-row" aria-hidden="true">
+            <span class="skeleton-media"></span>
+            <div class="cart-loading-copy">
+              <span class="skeleton-line skeleton-line--title"></span>
+              <span class="skeleton-line skeleton-line--copy"></span>
+            </div>
+            <span class="skeleton-line skeleton-line--price"></span>
+          </div>
+        }
+      </section>
+      <aside class="cart-loading-summary" aria-hidden="true">
+        <span class="skeleton-line skeleton-line--title"></span>
+        <span class="skeleton-line"></span>
+        <span class="skeleton-line"></span>
+        <span class="skeleton-line skeleton-line--button"></span>
+      </aside>
+    </div>
+  } @else if (store.lines().length > 0) {
+    <div class="cart-layout">
+      <section class="items-panel">
+        <div class="items-toolbar">
+          <span class="select-control">{{ store.itemsCount() }} item(s) in your cart</span>
+          <button type="button" class="clear-link" (click)="clearCart()" [disabled]="busy()">
+            Clear cart
+          </button>
         </div>
-        <div class="quantity-control">
-          <button type="button" (click)="changeQuantity(i, item.quantity - 1)" aria-label="Decrease quantity">−</button>
-          <span>{{ item.quantity }}</span>
-          <button type="button" (click)="changeQuantity(i, item.quantity + 1)" aria-label="Increase quantity">+</button>
+
+        @for (line of store.lines(); track line.id) {
+          <article class="cart-item" [class.has-issue]="line.issue">
+            <a [routerLink]="['/product', line.product.slug]">
+              @if (line.product.main_image) {
+                <img [src]="line.product.main_image" [alt]="line.product.name" class="item-image" />
+              } @else {
+                <div class="item-image item-image-empty"><i class="bi bi-image"></i></div>
+              }
+            </a>
+
+            <div class="item-details">
+              @if (line.product.brand) {
+                <span class="item-category">{{ line.product.brand }}</span>
+              }
+              <h2>{{ line.product.name }}</h2>
+              <p>{{ line.unit_price | currency }} each</p>
+
+              @switch (line.issue) {
+                @case ('out_of_stock') {
+                  <p class="item-issue">Out of stock. Remove it to check out.</p>
+                }
+                @case ('unavailable') {
+                  <p class="item-issue">No longer available. Remove it to check out.</p>
+                }
+                @case ('insufficient_stock') {
+                  <p class="item-issue">
+                    Only {{ line.available_quantity }} in stock.
+                    <button
+                      type="button"
+                      class="issue-button"
+                      (click)="changeQuantity(line, line.available_quantity ?? 1)"
+                      [disabled]="busy()"
+                    >
+                      Set to {{ line.available_quantity }}
+                    </button>
+                  </p>
+                }
+              }
+            </div>
+
+            <div class="quantity-control">
+              <button
+                type="button"
+                (click)="changeQuantity(line, line.quantity - 1)"
+                [disabled]="busy() || line.quantity <= 1"
+                aria-label="Decrease quantity"
+              >−</button>
+              <span>{{ line.quantity }}</span>
+              <button
+                type="button"
+                (click)="changeQuantity(line, line.quantity + 1)"
+                [disabled]="busy() || line.quantity >= maxFor(line)"
+                aria-label="Increase quantity"
+              >+</button>
+            </div>
+
+            <strong class="item-total">{{ line.line_total | currency }}</strong>
+
+            <button
+              type="button"
+              class="remove-button"
+              (click)="removeItem(line)"
+              [disabled]="busy()"
+              aria-label="Remove item"
+            >
+              <i class="bi bi-trash3"></i>
+            </button>
+          </article>
+        }
+      </section>
+
+      <aside class="summary-panel">
+        <p class="eyebrow">Order summary</p>
+        <h2>Ready when you are.</h2>
+
+        <div class="summary-row">
+          <span>Items</span>
+          <strong>{{ store.itemsCount() }}</strong>
         </div>
-        <strong class="item-total">{{ (item.price * item.quantity) | currency }}</strong>
-        <button type="button" class="remove-button" (click)="removeItem(i)" aria-label="Remove item">
-          <i class="bi bi-trash3"></i>
+        <div class="summary-total">
+          <span>Subtotal</span>
+          <strong>{{ store.subtotal() | currency }}</strong>
+        </div>
+        <div class="summary-row muted">
+          <span>Delivery</span>
+          <span>Calculated at checkout</span>
+        </div>
+
+        @if (store.hasIssues()) {
+          <p class="item-issue">Items with a warning are not included in the subtotal.</p>
+        }
+        @if (!auth.isLoggedIn()) {
+          <p class="guest-note">Sign in to save your cart to your account. Prices are confirmed at checkout.</p>
+        }
+
+        <button type="button" class="checkout-button" (click)="checkout()" [disabled]="busy()">
+          Checkout <i class="bi bi-arrow-right"></i>
         </button>
-      </article>
-    </section>
-
-    <aside class="summary-panel">
-      <p class="eyebrow">Order summary</p>
-      <h2>Ready when you are.</h2>
-      <div class="summary-row">
-        <span>Selected items</span>
-        <strong>{{ cartItems | selectedCount }}</strong>
-      </div>
-      <div class="summary-row">
-        <span>Subtotal</span>
-        <strong>{{ total | currency }}</strong>
-      </div>
-      <div class="summary-row muted">
-        <span>Shipping</span>
-        <span>Free</span>
-      </div>
-      <div class="summary-total">
-        <span>Total</span>
-        <strong>{{ total | currency }}</strong>
-      </div>
-      <button type="button" class="checkout-button" (click)="checkout()">
-        Secure checkout <i class="bi bi-arrow-right"></i>
-      </button>
-      <p class="secure-note"><i class="bi bi-shield-check"></i> Safe and secure payment</p>
-    </aside>
-  </div>
-
-  <ng-template #emptyCart>
+        <p class="secure-note"><i class="bi bi-shield-check"></i> Safe and secure payment</p>
+      </aside>
+    </div>
+  } @else {
     <section class="empty-cart">
       <div class="empty-icon"><i class="bi bi-bag"></i></div>
       <h2>Your cart is waiting.</h2>
       <p>Discover something beautiful and it will appear here.</p>
-      <a routerLink="/product-page" class="checkout-button">Explore products <i class="bi bi-arrow-up-right"></i></a>
+      <a routerLink="/product-page" class="checkout-button">
+        Explore products <i class="bi bi-arrow-up-right"></i>
+      </a>
     </section>
-  </ng-template>
+  }
 </main>

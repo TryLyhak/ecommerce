@@ -9,8 +9,20 @@
     <a routerLink="/product-page" class="view-all">View all products <i class="bi bi-arrow-up-right"></i></a>
   </div>
 
-    @if (loading()) {
-    <p class="text-center py-5">Loading products...</p>
+  @if (loading()) {
+    <div class="product-grid skeleton-grid" role="status" aria-label="Loading products" aria-busy="true">
+      @for (card of skeletonCards; track $index) {
+        <div class="skeleton-card" aria-hidden="true">
+          <span class="skeleton-media"></span>
+          <div class="skeleton-content">
+            <span class="skeleton-line skeleton-line--title"></span>
+            <span class="skeleton-line skeleton-line--price"></span>
+            <span class="skeleton-line skeleton-line--copy"></span>
+            <span class="skeleton-line skeleton-line--button"></span>
+          </div>
+        </div>
+      }
+    </div>
   } @else if (errorMessage()) {
     <p class="text-center py-5 text-danger">{{ errorMessage() }}</p>
   } @else {

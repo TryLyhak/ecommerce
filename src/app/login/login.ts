@@ -3,6 +3,9 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { CartStore } from '../services/cart-store.service';
+import { showMergeNotice } from '../utils/merge-notice';
+import { showToast } from '../utils/toast';
 
 @Component({
   selector: 'app-login',
@@ -14,6 +17,7 @@ export class Login {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
   private router = inject(Router);
+  private cart = inject(CartStore);
 
   // The form and its rules (checked in the browser before anything is sent)
   form = this.fb.nonNullable.group({
@@ -42,14 +46,33 @@ export class Login {
 
     this.auth.login(this.form.getRawValue()).subscribe({
       next: () => {
-        this.submitting.set(false);
-        this.router.navigateByUrl('/');
+        // Move a visitor's browser cart into the account cart, then go home
+        this.cart.syncAfterSignIn().subscribe({
+          next: (result) => {
+            showMergeNotice(result);
+            this.finishSignIn();
+          },
+          error: () => {
+            // Signed in, but the merge failed: the browser cart is kept, so nothing is lost
+            showToast(
+              'warning',
+              'Signed in, but your cart could not be merged. Please try again.',
+            );
+            this.cart.refresh().subscribe();
+            this.finishSignIn();
+          },
+        });
       },
       error: (err: HttpErrorResponse) => {
         this.submitting.set(false);
         this.errorMessage.set(this.messageFor(err));
       },
     });
+  }
+
+  private finishSignIn(): void {
+    this.submitting.set(false);
+    this.router.navigateByUrl('/');
   }
 
   // Turns an API error into a friendly message

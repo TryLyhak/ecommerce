@@ -1,119 +1,65 @@
-import { Component, OnInit } from '@angular/core';
-import { CartService } from '../services/cart.service';
-import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { Component, inject, signal } from '@angular/core';
+import { CurrencyPipe } from '@angular/common';
+import { Router, RouterLink } from '@angular/router';
+import { Observable, finalize } from 'rxjs';
 import Swal from 'sweetalert2';
-import { RouterLink } from '@angular/router';
-import { SelectedCountPipe } from './selected-count.pipe';
+import { AuthService } from '../services/auth.service';
+import { CartStore } from '../services/cart-store.service';
+import { CartLine } from '../models/cart.model';
+import { showToast } from '../utils/toast';
 
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [FormsModule, CommonModule, RouterLink, SelectedCountPipe],
+  imports: [CurrencyPipe, RouterLink],
   templateUrl: './cart.html',
   styleUrls: ['./cart.css'],
 })
-export class cart implements OnInit {
-  cartItems: any[] = [];
-  total: number = 0;
-  selectAllChecked = false;
+export class cart {
+  readonly store = inject(CartStore);
+  readonly auth = inject(AuthService);
+  private router = inject(Router);
+  readonly loadingRows = [0, 1, 2];
 
-  constructor(private cartService: CartService) {}
+  // True while a request is running, so buttons cannot be double-clicked
+  busy = signal(false);
 
-  ngOnInit() {
-    this.cartItems = this.cartService.cartItems().map((item: any) => ({
-      ...item,
-      quantity: item.quantity || 1,
-      selected: true,
-    }));
-    this.calculateTotal();
+  ngOnInit(): void {
+    // Always show fresh prices and stock from the server when the page opens
+    this.store.refresh().subscribe();
   }
 
-  // removeItem(index: number) {
-  //   this.cartService.removeFromCart(index);
-  //   this.cartItems = this.cartService.cartItems();
-  //   this.calculateTotal();
-  // }
+  // The most the customer can have of this line (stock or the limit of 20)
+  maxFor(line: CartLine): number {
+    return Math.min(
+      line.available_quantity ?? CartStore.MAX_PER_ITEM,
+      CartStore.MAX_PER_ITEM,
+    );
+  }
 
-  removeItem(index: number) {
+  changeQuantity(line: CartLine, quantity: number): void {
+    if (quantity < 1) {
+      return;
+    }
+    this.run(this.store.setQuantity(line.id, quantity));
+  }
+
+  removeItem(line: CartLine): void {
     Swal.fire({
-      title: 'Are you sure?',
-      text: 'Do you want to remove this item from your cart?',
+      title: 'Remove this item?',
+      text: line.product.name,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Yes, remove it!',
+      confirmButtonText: 'Yes, remove it',
     }).then((result) => {
       if (result.isConfirmed) {
-        this.cartService.removeFromCart(index);
-        this.cartItems = this.cartService.cartItems().map((item: any) => ({
-          ...item,
-          selected: true,
-        }));
-        this.calculateTotal();
-
-        Swal.fire('Removed!', 'The item has been removed.', 'success');
-      }
-    });
-  }
-  //  checkout
-
-  checkout() {
-    const selectedItems = this.cartItems.filter((item) => item.selected);
-
-    if (selectedItems.length === 0) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Nothing selected',
-        text: 'Select at least one item before checking out.',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
-
-    Swal.fire({
-      title: 'Confirm Payment',
-      html: `
-      <p>Total Amount: <b>$${this.total.toFixed(2)}</b></p>
-      <p>Do you want to proceed with payment?</p>
-    `,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Pay Now',
-      cancelButtonText: 'Cancel',
-      confirmButtonColor: '#28a745',
-      cancelButtonColor: '#dc3545',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        Swal.fire({
-          icon: 'success',
-          title: 'Payment Successful! 🎉',
-          text: 'Thank you for your purchase.',
-          confirmButtonText: 'OK',
-        }).then(() => {
-          const purchasedIds = new Set(selectedItems.map((item) => item.id));
-          this.cartService.updateCart(
-            this.cartService
-              .cartItems()
-              .filter((item) => !purchasedIds.has(item.id)),
-          );
-          this.cartItems = this.cartService.cartItems().map((item: any) => ({
-            ...item,
-            selected: true,
-          }));
-          this.selectAllChecked = this.cartItems.length > 0;
-          this.calculateTotal();
-        });
+        this.run(this.store.remove(line.id), 'Item removed');
       }
     });
   }
 
-  clearCart() {
-    if (this.cartItems.length === 0) {
-      return;
-    }
-
+  clearCart(): void {
     Swal.fire({
       title: 'Clear your cart?',
       text: 'All items will be removed.',
@@ -123,36 +69,50 @@ export class cart implements OnInit {
       confirmButtonText: 'Clear cart',
     }).then((result) => {
       if (result.isConfirmed) {
-        this.cartService.clearCart();
-        this.cartItems = [];
-        this.selectAllChecked = false;
-        this.total = 0;
+        this.run(this.store.clear(), 'Cart emptied');
       }
     });
   }
 
-  calculateTotal() {
-    this.total = this.cartItems
-      .filter((item) => item.selected) // only selected items
-      .reduce((sum, item) => sum + item.price * (item.quantity || 1), 0);
-    this.selectAllChecked =
-      this.cartItems.length > 0 && this.cartItems.every((item) => item.selected);
+  checkout(): void {
+    if (this.store.lines().length === 0) {
+      return;
+    }
+
+    if (this.store.hasIssues()) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Fix your cart first',
+        text: 'Remove or reduce the items marked with a warning before checking out.',
+      });
+      return;
+    }
+
+    // A visitor signs in first. Their cart is merged into the account on sign-in.
+    if (!this.auth.isLoggedIn()) {
+      this.router.navigateByUrl('/login');
+      return;
+    }
+
+    // Honest placeholder: no fake payment. Real checkout is built in the next phase.
+    Swal.fire({
+      icon: 'info',
+      title: 'Checkout is coming soon',
+      text: 'Your cart is saved to your account. Ordering and payment will be available in the next update.',
+    });
   }
 
-  toggleSelectAll() {
-    this.cartItems.forEach((item) => (item.selected = this.selectAllChecked));
-    this.calculateTotal();
-  }
+  // Runs a cart request, blocks the buttons meanwhile and shows errors from the API
+  private run(request: Observable<unknown>, successMessage?: string): void {
+    this.busy.set(true);
 
-  onItemSelectionChange() {
-    this.selectAllChecked = this.cartItems.every((item) => item.selected);
-    this.calculateTotal();
-  }
-
-  changeQuantity(index: number, quantity: number): void {
-    const nextQuantity = Math.max(1, Math.floor(quantity || 1));
-    this.cartItems[index].quantity = nextQuantity;
-    this.cartService.updateQuantity(index, nextQuantity);
-    this.calculateTotal();
+    request.pipe(finalize(() => this.busy.set(false))).subscribe({
+      next: () => {
+        if (successMessage) {
+          showToast('success', successMessage);
+        }
+      },
+      error: (err) => showToast('error', this.store.errorMessage(err)),
+    });
   }
 }

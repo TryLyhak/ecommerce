@@ -1,37 +1,66 @@
 <div class="product-card">
   <div class="card h-100">
+
     @if (product().category) {
-      <div class="category-badge">{{ product().category?.name }}</div>
+      <div class="category-badge">
+        {{ product().category?.name }}
+      </div>
     }
 
-    <a [routerLink]="['/product', product().slug]">
+    <a
+      [routerLink]="['/product', product().slug]"
+      class="product-image-link"
+    >
       @if (product().main_image) {
-        <img [src]="product().main_image" class="card-img-top pro-img" [alt]="product().name" />
+        <img
+          [src]="product().main_image"
+          class="card-img-top pro-img"
+          [alt]="product().name"
+        />
       } @else {
-        <div class="no-image">No image</div>
+        <div class="no-image">
+          <span>No image available</span>
+        </div>
       }
     </a>
 
     <div class="card-body">
-      <h5 class="card-title product-title">{{ product().name }}</h5>
+
+      <h5 class="card-title product-title">
+        {{ product().name }}
+      </h5>
 
       <div class="price-row">
-        <span class="price">{{ product().current_price | currency }}</span>
+        <span class="price">
+          {{ product().current_price | currency }}
+        </span>
+
         @if (product().on_sale) {
-          <span class="old-price">{{ product().price | currency }}</span>
+          <span class="old-price">
+            {{ product().price | currency }}
+          </span>
         }
-        <span class="price-khr">{{ product().current_price | toKHR }}</span>
       </div>
 
-      <h6 class="card-title product-description">{{ product().description }}</h6>
+      <div class="price-khr">
+        {{ product().current_price | toKHR }}
+      </div>
+
+      <p class="product-description">
+        {{ product().description }}
+      </p>
 
       @if (product().stock_status === 'out_of_stock') {
-        <button class="add-button" disabled>Out of stock</button>
+        <button class="add-button" disabled>
+          Out of stock
+        </button>
       } @else {
         <button class="add-button" (click)="addToCart()">
-          Add to cart <i class="bi bi-arrow-right"></i>
+          <span>Add to cart</span>
+          <i class="bi bi-arrow-right"></i>
         </button>
       }
+
     </div>
   </div>
 </div>

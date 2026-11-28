@@ -13,6 +13,7 @@ import { Product } from '../models/product.model';
 })
 export class Home {
   private catalog = inject(CatalogService);
+  readonly skeletonCards = Array.from({ length: 4 });
 
   // Signals: the template re-renders automatically when they change
   products = signal<Product[]>([]);

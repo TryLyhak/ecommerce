@@ -341,3 +341,62 @@ h1 {
     grid-row: 1;
   }
 }
+
+
+/* The checkbox column is gone: image, details, quantity, total, remove */
+.cart-item {
+  grid-template-columns: 82px minmax(120px, 1fr) auto auto 24px;
+}
+
+@media (max-width: 767px) {
+  .cart-item {
+    grid-template-columns: 64px minmax(0, 1fr) 24px;
+  }
+}
+
+/* Placeholder when a product has no image */
+.item-image-empty {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  justify-content: center;
+}
+
+/* Warning shown under a product that cannot be bought as it is */
+.item-issue {
+  color: #c0392b;
+  font-size: 0.76rem;
+  font-weight: 700;
+  margin: 0.4rem 0 0;
+}
+
+.cart-item.has-issue {
+  background: #fff6f4;
+}
+
+.issue-button {
+  background: transparent;
+  border: 1px solid #c0392b;
+  border-radius: 6px;
+  color: #c0392b;
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 700;
+  margin-left: 0.4rem;
+  padding: 0.15rem 0.5rem;
+}
+
+.guest-note {
+  color: var(--muted);
+  font-size: 0.78rem;
+  margin: 0.75rem 0 0;
+}
+
+/* Disabled controls while a request runs, or at the quantity limits */
+.quantity-control button:disabled,
+.remove-button:disabled,
+.clear-link:disabled,
+.checkout-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}

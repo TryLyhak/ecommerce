@@ -2,7 +2,8 @@ import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CurrencyPipe } from '@angular/common';
 import { toKHRPipe } from '../custom-pipe/to-khr-pipe';
-import { CartService } from '../services/cart.service';
+import { CartStore } from '../services/cart-store.service';
+import { showToast } from '../utils/toast';
 import { CatalogService } from '../services/catalog.service';
 import { ProductCard } from '../product-card/product-card';
 import { Product } from '../models/product.model';
@@ -17,7 +18,7 @@ import { Product } from '../models/product.model';
 export class ProductDetail {
   private route = inject(ActivatedRoute);
   private catalog = inject(CatalogService);
-  private cartService = inject(CartService);
+  private cart = inject(CartStore);
 
   // Signals: the template updates automatically when they change
   product = signal<Product | null>(null);
@@ -62,15 +63,9 @@ export class ProductDetail {
       return;
     }
 
-    // TEMPORARY: CartService still expects the old FakeStore shape.
-    // We replace this when we rebuild the cart in Phase 4.
-    this.cartService.addToCart({
-      id: product.id,
-      title: product.name,
-      image: product.main_image,
-      price: product.current_price,
-      category: product.category?.name,
-      description: product.description,
+    this.cart.add(product).subscribe({
+      next: () => showToast('success', 'Added to cart'),
+      error: (err) => showToast('error', this.cart.errorMessage(err)),
     });
   }
 }

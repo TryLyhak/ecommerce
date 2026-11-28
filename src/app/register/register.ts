@@ -9,6 +9,9 @@ import {
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { CartStore } from '../services/cart-store.service';
+import { showMergeNotice } from '../utils/merge-notice';
+import { showToast } from '../utils/toast';
 
 // Group-level check: the two password boxes must match
 function passwordsMatch(group: AbstractControl): ValidationErrors | null {
@@ -27,6 +30,7 @@ export class Register {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
   private router = inject(Router);
+  private cart = inject(CartStore);
 
   form = this.fb.nonNullable.group(
     {
@@ -68,8 +72,21 @@ export class Register {
 
     this.auth.register(payload).subscribe({
       next: () => {
-        this.submitting.set(false);
-        this.router.navigateByUrl('/');
+        // Move a visitor's browser cart into the new account, then go home
+        this.cart.syncAfterSignIn().subscribe({
+          next: (result) => {
+            showMergeNotice(result);
+            this.finishSignIn();
+          },
+          error: () => {
+            showToast(
+              'warning',
+              'Account created, but your cart could not be merged. Please try again.',
+            );
+            this.cart.refresh().subscribe();
+            this.finishSignIn();
+          },
+        });
       },
       error: (err: HttpErrorResponse) => {
         this.submitting.set(false);
@@ -86,6 +103,11 @@ export class Register {
         }
       },
     });
+  }
+
+  private finishSignIn(): void {
+    this.submitting.set(false);
+    this.router.navigateByUrl('/');
   }
 
   // First API message for a field, or an empty text

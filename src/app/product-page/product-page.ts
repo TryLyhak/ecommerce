@@ -14,6 +14,7 @@ export class ProductPage {
   private catalog = inject(CatalogService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  readonly skeletonCards = Array.from({ length: 8 });
 
   // Signals: the template updates automatically when they change
   products = signal<Product[]>([]);

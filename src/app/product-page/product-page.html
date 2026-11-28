@@ -1,109 +1,263 @@
 <main class="products-page container py-4 py-lg-5">
+
+  <!-- Page heading -->
   <div class="products-heading">
-    <div>
-      <p class="eyebrow">Explore the collection</p>
-      <h1>{{ searchTerm() ? 'Search results' : 'All products' }}</h1>
+    <div class="heading-content">
+      <p class="eyebrow">SCOTT. STORE / COLLECTION</p>
+
+      <h1>{{ searchTerm() ? 'Search results' : 'Discover products' }}</h1>
+
       @if (searchTerm()) {
-        <p class="results-copy">Showing results for <strong>"{{ searchTerm() }}"</strong></p>
+        <p class="results-copy">
+          Results for <strong>"{{ searchTerm() }}"</strong>
+        </p>
+      } @else {
+        <p class="results-copy">
+          Discover products selected for your everyday lifestyle.
+        </p>
       }
     </div>
-    <span class="result-count">{{ total() }} items</span>
+
+    <div class="result-count">
+      <span>{{ total() }}</span> products
+    </div>
   </div>
 
-    <!-- Filters: category and sorting -->
-  <div class="filters-bar">
-    <label>
-      <span>Category</span>
-      <select (change)="onCategoryChange($event)">
-        <option value="" [selected]="selectedCategory() === ''">All categories</option>
-        @for (category of categories(); track category.id) {
-          <option [value]="category.slug" [selected]="selectedCategory() === category.slug">
-            {{ category.name }}
+  <!-- Filters -->
+  <section class="filter-panel">
+
+    <div class="filter-panel-heading">
+      <div class="filter-title">
+        <i class="bi bi-sliders"></i>
+        <span>Filters & sorting</span>
+      </div>
+    </div>
+
+    <div class="filters-bar">
+
+      <!-- Category -->
+      <label class="filter-control category-control">
+        <span class="filter-label">Category</span>
+
+        <select (change)="onCategoryChange($event)">
+          <option value="" [selected]="selectedCategory() === ''">
+            All categories
           </option>
-          @for (child of category.children ?? []; track child.id) {
-            <option [value]="child.slug" [selected]="selectedCategory() === child.slug">
-              &nbsp;&nbsp;— {{ child.name }}
+
+          @for (category of categories(); track category.id) {
+            <option
+              [value]="category.slug"
+              [selected]="selectedCategory() === category.slug"
+            >
+              {{ category.name }}
             </option>
+
+            @for (child of category.children ?? []; track child.id) {
+              <option
+                [value]="child.slug"
+                [selected]="selectedCategory() === child.slug"
+              >
+                — {{ child.name }}
+              </option>
+            }
           }
-        }
-      </select>
-    </label>
-
-        <div class="price-filter">
-      <label>
-        <span>Min price ($)</span>
-        <input
-          #minBox
-          type="number"
-          min="0"
-          placeholder="0"
-          [value]="minPrice()"
-          (keyup.enter)="applyPrice(minBox.value, maxBox.value)"
-        />
+        </select>
       </label>
-      <label>
-        <span>Max price ($)</span>
-        <input
-          #maxBox
-          type="number"
-          min="0"
-          placeholder="Any"
-          [value]="maxPrice()"
-          (keyup.enter)="applyPrice(minBox.value, maxBox.value)"
-        />
+
+      <!-- Price range -->
+      <div class="price-filter">
+        <label class="filter-control">
+          <span class="filter-label">Min price</span>
+
+          <div class="price-input-wrapper">
+            <span>$</span>
+            <input
+              #minBox
+              type="number"
+              min="0"
+              placeholder="0"
+              [value]="minPrice()"
+              (keyup.enter)="applyPrice(minBox.value, maxBox.value)"
+            />
+          </div>
+        </label>
+
+        <label class="filter-control">
+          <span class="filter-label">Max price</span>
+
+          <div class="price-input-wrapper">
+            <span>$</span>
+            <input
+              #maxBox
+              type="number"
+              min="0"
+              placeholder="Any"
+              [value]="maxPrice()"
+              (keyup.enter)="applyPrice(minBox.value, maxBox.value)"
+            />
+          </div>
+        </label>
+
+        <button
+          type="button"
+          class="apply-price"
+          (click)="applyPrice(minBox.value, maxBox.value)"
+        >
+          Apply
+        </button>
+      </div>
+
+      <!-- Sort -->
+      <label class="filter-control sort-control">
+        <span class="filter-label">Sort by</span>
+
+        <select (change)="onSortChange($event)">
+          <option
+            value="newest"
+            [selected]="selectedSort() === 'newest'"
+          >
+            Newest
+          </option>
+
+          <option
+            value="price_asc"
+            [selected]="selectedSort() === 'price_asc'"
+          >
+            Price: Low to high
+          </option>
+
+          <option
+            value="price_desc"
+            [selected]="selectedSort() === 'price_desc'"
+          >
+            Price: High to low
+          </option>
+        </select>
       </label>
-      <button type="button" class="apply-price" (click)="applyPrice(minBox.value, maxBox.value)">
-        Apply
-      </button>
-    </div>
 
-    <label>
-      <span>Sort by</span>
-      <select (change)="onSortChange($event)">
-        <option value="newest" [selected]="selectedSort() === 'newest'">Newest</option>
-        <option value="price_asc" [selected]="selectedSort() === 'price_asc'">Price: low to high</option>
-        <option value="price_desc" [selected]="selectedSort() === 'price_desc'">Price: high to low</option>
-      </select>
-    </label>
-
-      @if (selectedCategory() || selectedSort() !== 'newest' || minPrice() || maxPrice())  {
-      <button type="button" class="clear-filters" (click)="clearFilters()">Clear filters</button>
-    }
-  </div>
-
-    @if (priceError()) {
-    <p class="filter-error">{{ priceError() }}</p>
-  }
-
-  @if (loading()) {
-    <p class="text-center py-5">Loading products...</p>
-  } @else if (errorMessage()) {
-    <p class="text-center py-5 text-danger">{{ errorMessage() }}</p>
-  } @else if (products().length) {
-    <div class="product-grid">
-      @for (item of products(); track item.id) {
-        <app-product-card [product]="item"></app-product-card>
+      <!-- Clear -->
+      @if (
+        selectedCategory() ||
+        selectedSort() !== 'newest' ||
+        minPrice() ||
+        maxPrice()
+      ) {
+        <button
+          type="button"
+          class="clear-filters"
+          (click)="clearFilters()"
+        >
+          <i class="bi bi-arrow-counterclockwise"></i>
+          Reset
+        </button>
       }
-    </div>
 
-    <!-- Page buttons: only shown when there is more than one page -->
-    @if (lastPage() > 1) {
-      <nav class="pagination-bar">
-        <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1">
-          <i class="bi bi-arrow-left"></i> Previous
-        </button>
-        <span>Page {{ currentPage() }} of {{ lastPage() }}</span>
-        <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === lastPage()">
-          Next <i class="bi bi-arrow-right"></i>
-        </button>
-      </nav>
-    }
-  } @else {
-    <section class="no-results">
-      <div class="empty-search-icon"><i class="bi bi-search"></i></div>
-      <h2>No products found</h2>
-      <p>Try searching for another product, category, or keyword.</p>
-      <a routerLink="/product-page" class="clear-results">View all products</a>
-    </section>
+    </div>
+  </section>
+
+  <!-- Price error -->
+  @if (priceError()) {
+    <div class="filter-error">
+      <i class="bi bi-exclamation-circle"></i>
+      {{ priceError() }}
+    </div>
   }
+
+  <!-- Products -->
+  <section class="products-content">
+
+    @if (loading()) {
+      <div class="product-grid skeleton-grid" role="status" aria-label="Loading products" aria-busy="true">
+        @for (card of skeletonCards; track $index) {
+          <div class="skeleton-card" aria-hidden="true">
+            <span class="skeleton-media"></span>
+            <div class="skeleton-content">
+              <span class="skeleton-line skeleton-line--title"></span>
+              <span class="skeleton-line skeleton-line--price"></span>
+              <span class="skeleton-line skeleton-line--copy"></span>
+              <span class="skeleton-line skeleton-line--button"></span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+    @else if (errorMessage()) {
+      <div class="products-message error-message">
+        <i class="bi bi-exclamation-circle"></i>
+        <h3>Something went wrong</h3>
+        <p>{{ errorMessage() }}</p>
+      </div>
+    }
+
+    @else if (products().length) {
+
+      <!-- Results toolbar -->
+      <div class="products-toolbar">
+        <span>
+          Showing <strong>{{ products().length }}</strong> products
+        </span>
+      </div>
+
+      <div class="product-grid">
+        @for (item of products(); track item.id) {
+          <app-product-card [product]="item"></app-product-card>
+        }
+      </div>
+
+      <!-- Pagination -->
+      @if (lastPage() > 1) {
+        <nav class="pagination-bar" aria-label="Product pagination">
+
+          <button
+            (click)="goToPage(currentPage() - 1)"
+            [disabled]="currentPage() === 1"
+          >
+            <i class="bi bi-chevron-left"></i>
+            <span>Previous</span>
+          </button>
+
+          <div class="page-indicator">
+            <span class="current-page">{{ currentPage() }}</span>
+            <span class="page-divider">/</span>
+            <span>{{ lastPage() }}</span>
+          </div>
+
+          <button
+            (click)="goToPage(currentPage() + 1)"
+            [disabled]="currentPage() === lastPage()"
+          >
+            <span>Next</span>
+            <i class="bi bi-chevron-right"></i>
+          </button>
+
+        </nav>
+      }
+    }
+
+    @else {
+      <!-- Empty state -->
+      <section class="no-results">
+        <div class="empty-search-icon">
+          <i class="bi bi-search"></i>
+        </div>
+
+        <h2>No products found</h2>
+
+        <p>
+          We couldn't find anything matching your search or filters.
+          Try changing your search or filter criteria.
+        </p>
+
+        <button
+          type="button"
+          class="clear-results"
+          (click)="clearFilters()"
+        >
+          <i class="bi bi-arrow-counterclockwise"></i>
+          Clear filters
+        </button>
+      </section>
+    }
+
+  </section>
 </main>
