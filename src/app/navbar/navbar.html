@@ -1,62 +1,77 @@
 <nav class="navbar navbar-expand-lg shop-nav">
   <div class="container">
-  <a class="navbar-brand" routerLink="/">
-    <span class="brand-mark">S</span>
-    <span>Scott Shop<span class="brand-dot">.</span></span>
-  </a>
-  <button
-    class="navbar-toggler"
-    type="button"
-    data-bs-toggle="collapse"
-    data-bs-target="#navbarContent"
-  >
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse" id="navbarContent">
-    <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
-      <li class="nav-item">
-        <a class="nav-link menu-link" routerLink="/">Home</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link menu-link" routerLink="/product-page">Products</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link menu-link" routerLink="/contact">Contact</a>
-      </li>
-    </ul>
-    <form class="nav-actions d-flex align-items-center" (submit)="$event.preventDefault()">
-      <label class="search-box">
-        <i class="bi bi-search" aria-hidden="true"></i>
-        <input
-          type="search"
-          [ngModel]="searchTerm"
-          (ngModelChange)="search($event)"
-          name="search"
-          placeholder="Search products..."
-          aria-label="Search products"
-        />
-        @if (searchTerm) {
-          <button type="button" class="clear-search" (click)="search('')" aria-label="Clear search">
+    <a class="navbar-brand" routerLink="/">
+      <span class="brand-mark">S</span>
+      <span>Scott Shop<span class="brand-dot">.</span></span>
+    </a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarContent"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link menu-link" routerLink="/">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link menu-link" routerLink="/product-page">Products</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link menu-link" routerLink="/contact">Contact</a>
+        </li>
+      </ul>
+      <form
+        class="nav-actions d-flex align-items-center"
+        (submit)="$event.preventDefault()"
+      >
+        <label class="search-box">
+          <i class="bi bi-search" aria-hidden="true"></i>
+          <input
+            type="search"
+            [ngModel]="searchTerm"
+            (ngModelChange)="search($event)"
+            name="search"
+            placeholder="Search products..."
+            aria-label="Search products"
+          />
+          @if (searchTerm) {
+          <button
+            type="button"
+            class="clear-search"
+            (click)="search('')"
+            aria-label="Clear search"
+          >
             <i class="bi bi-x"></i>
           </button>
-        }
-      </label>
-      <a routerLink="/cart" class="cart-button">
-        <i class="bi bi-bag me-2"></i>Cart
-        <span class="cart-count">{{ cartCount() }}</span>
-      </a>
-    </form>
-        <div class="auth-actions">
-      @if (auth.isLoggedIn()) {
+          }
+        </label>
+        <a routerLink="/cart" class="cart-button">
+          <i class="bi bi-bag me-2"></i>Cart
+          <span class="cart-count">{{ cartCount() }}</span>
+        </a>
+      </form>
+      <div class="auth-actions">
+        @if (auth.isLoggedIn()) {
         <span class="user-name">
-          <i class="bi bi-person-circle me-1"></i>{{ auth.user()?.name ?? 'Account' }}
+          <i class="bi bi-person-circle me-1"></i>{{ auth.user()?.name ??
+          'Account' }}
         </span>
-        <button type="button" class="auth-button" (click)="logout()">Logout</button>
-      } @else {
+        <a routerLink="/orders" class="auth-button">My orders</a>
+        <a routerLink="/account/addresses" class="auth-button">Addresses</a>
+        <button type="button" class="auth-button" (click)="logout()">
+          Logout
+        </button>
+        } @else {
         <a routerLink="/login" class="auth-button">Login</a>
-        <a routerLink="/register" class="auth-button auth-button-primary">Register</a>
-      }
+        <a routerLink="/register" class="auth-button auth-button-primary"
+          >Register</a
+        >
+        }
+      </div>
     </div>
-  </div>
   </div>
 </nav>

@@ -4,6 +4,9 @@ import { Footer } from './footer/footer';
 import { Navbar } from './navbar/navbar';
 import { AuthService } from './services/auth.service';
 import { CartStore } from './services/cart-store.service';
+import { AddressService } from './services/address.service';
+import { DeliveryService } from './services/delivery.service';
+import { OrderService } from './services/order.service';
 
 @Component({
   selector: 'app-root',
@@ -15,6 +18,9 @@ export class App {
   protected title = 'ng_web';
   private auth = inject(AuthService);
   private cartStore = inject(CartStore);
+  private addressService = inject(AddressService);
+  private deliveryService = inject(DeliveryService);
+  private orderService = inject(OrderService);
 
   // constructor() {
   //   // TEMPORARY TEST: remove after checking the console
@@ -39,5 +45,16 @@ export class App {
     }
     // The cart laod from the API or from the browser storage
     this.cartStore.refresh().subscribe();
+    // TEMPORARY TEST: remove after checking the console
+    this.deliveryService
+      .getZones()
+      .subscribe((zones) => console.log('Zones:', zones.length));
+    this.deliveryService
+      .getProvinces()
+      .subscribe((p) => console.log('Provinces:', p.length, p[0]));
+    this.addressService.list().subscribe((a) => console.log('Addresses:', a));
+    this.orderService
+      .list()
+      .subscribe((r) => console.log('Orders:', r.meta.total));
   }
 }

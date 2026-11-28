@@ -1,0 +1,49 @@
+<main class="orders-page container py-4 py-lg-5">
+  <div class="orders-heading">
+    <p class="eyebrow">Your account</p>
+    <h1>My orders</h1>
+  </div>
+
+  @if (loading()) {
+    <p class="text-center py-5">Loading your orders...</p>
+  } @else if (errorMessage()) {
+    <p class="text-center py-5 text-danger">{{ errorMessage() }}</p>
+  } @else if (orders().length === 0) {
+    <section class="empty-orders">
+      <div class="empty-icon"><i class="bi bi-receipt"></i></div>
+      <h2>No orders yet</h2>
+      <p>When you place an order, it will appear here.</p>
+      <a routerLink="/product-page" class="primary-link">Explore products</a>
+    </section>
+  } @else {
+    <div class="order-list">
+      @for (order of orders(); track order.id) {
+        <a class="order-card" [routerLink]="['/orders', order.id]">
+          <div class="order-top">
+            <strong>{{ order.order_number }}</strong>
+            <span class="status-badge status-{{ order.status }}">{{ statusLabels[order.status] }}</span>
+          </div>
+          <p class="order-meta">
+            {{ order.created_at | date: 'medium' }} · {{ itemCount(order) }} item(s)
+          </p>
+          <div class="order-bottom">
+            <span class="payment-text">{{ paymentLabels[order.payment_status] }}</span>
+            <strong>{{ order.total | currency }}</strong>
+          </div>
+        </a>
+      }
+    </div>
+
+    @if (lastPage() > 1) {
+      <nav class="pagination-bar">
+        <button type="button" (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1">
+          <i class="bi bi-arrow-left"></i> Previous
+        </button>
+        <span>Page {{ currentPage() }} of {{ lastPage() }}</span>
+        <button type="button" (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === lastPage()">
+          Next <i class="bi bi-arrow-right"></i>
+        </button>
+      </nav>
+    }
+  }
+</main>

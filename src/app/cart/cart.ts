@@ -95,11 +95,12 @@ export class cart {
     }
 
     // Honest placeholder: no fake payment. Real checkout is built in the next phase.
-    Swal.fire({
-      icon: 'info',
-      title: 'Checkout is coming soon',
-      text: 'Your cart is saved to your account. Ordering and payment will be available in the next update.',
-    });
+    // Swal.fire({
+    //   icon: 'info',
+    //   title: 'Checkout is coming soon',
+    //   text: 'Your cart is saved to your account. Ordering and payment will be available in the next update.',
+    // });
+    this.router.navigateByUrl('/checkout');
   }
 
   // Runs a cart request, blocks the buttons meanwhile and shows errors from the API

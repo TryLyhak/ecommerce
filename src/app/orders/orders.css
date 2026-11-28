@@ -1,0 +1,123 @@
+.orders-heading h1 {
+  color: var(--ink);
+  margin-bottom: 1.5rem;
+}
+
+.order-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.order-card,
+.empty-orders {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 8px 22px rgb(23 32 51 / 0.04);
+}
+
+.order-card {
+  color: inherit;
+  display: block;
+  padding: 1.15rem 1.3rem;
+  text-decoration: none;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.order-card:hover {
+  box-shadow: 0 14px 30px rgb(23 32 51 / 0.1);
+  transform: translateY(-2px);
+}
+
+.order-top,
+.order-bottom {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.order-top strong,
+.order-bottom strong {
+  color: var(--ink);
+}
+
+.order-meta {
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin: 0.35rem 0 0.7rem;
+}
+
+.payment-text {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+/* The status badge (also used on the order page) */
+.status-badge {
+  background: #eef1f5;
+  border-radius: 999px;
+  color: #3d4a5c;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 0.25rem 0.65rem;
+  text-transform: uppercase;
+}
+
+.status-pending { background: #fff6e5; color: #8a5a00; }
+.status-confirmed,
+.status-processing,
+.status-ready_to_ship { background: #e8f1ff; color: #1d4f9a; }
+.status-shipped { background: #efe9ff; color: #5a3fa0; }
+.status-delivered { background: #e6f6ec; color: #1e7a45; }
+.status-cancelled,
+.status-returned { background: #fdecea; color: #c0392b; }
+
+.empty-orders {
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+
+.empty-icon {
+  color: var(--muted);
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.primary-link {
+  background: var(--ink);
+  border-radius: 8px;
+  color: white;
+  display: inline-block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.65rem 1rem;
+  text-decoration: none;
+}
+
+/* Previous / Next page buttons */
+.pagination-bar {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.pagination-bar button {
+  background: var(--ink);
+  border: 0;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.65rem 1rem;
+}
+
+.pagination-bar button:disabled {
+  background: var(--muted);
+  cursor: not-allowed;
+  opacity: 0.6;
+}

@@ -1643,7 +1643,7 @@ var require_sweetalert2_all = __commonJS({
       const showLoading = (buttonToReplace) => {
         let popup = getPopup();
         if (!popup) {
-          new Swal4();
+          new Swal6();
         }
         popup = getPopup();
         if (!popup) {
@@ -3123,9 +3123,9 @@ var require_sweetalert2_all = __commonJS({
       });
       SweetAlert.DismissReason = DismissReason;
       SweetAlert.version = "11.22.4";
-      const Swal4 = SweetAlert;
-      Swal4.default = Swal4;
-      return Swal4;
+      const Swal6 = SweetAlert;
+      Swal6.default = Swal6;
+      return Swal6;
     });
     if (typeof exports !== "undefined" && exports.Sweetalert2) {
       exports.swal = exports.sweetAlert = exports.Swal = exports.SweetAlert = exports.Sweetalert2;
@@ -42319,11 +42319,7 @@ var cart = class _cart {
       this.router.navigateByUrl("/login");
       return;
     }
-    import_sweetalert22.default.fire({
-      icon: "info",
-      title: "Checkout is coming soon",
-      text: "Your cart is saved to your account. Ordering and payment will be available in the next update."
-    });
+    this.router.navigateByUrl("/checkout");
   }
   // Runs a cart request, blocks the buttons meanwhile and shows errors from the API
   run(request, successMessage) {
@@ -51548,6 +51544,1583 @@ var Register = class _Register {
   (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(Register, { className: "Register", filePath: "src/app/register/register.ts", lineNumber: 29 });
 })();
 
+// src/app/addresses/addresses.ts
+var import_sweetalert24 = __toESM(require_sweetalert2_all());
+
+// src/app/services/address.service.ts
+var AddressService = class _AddressService {
+  http = inject2(HttpClient);
+  apiUrl = environment.apiUrl;
+  // GET /addresses (the default address comes first)
+  list() {
+    return this.http.get(`${this.apiUrl}/addresses`).pipe(map((response) => response.data));
+  }
+  // POST /addresses
+  create(input2) {
+    return this.http.post(`${this.apiUrl}/addresses`, input2).pipe(map((response) => response.data));
+  }
+  // PATCH /addresses/{id} (only the fields you send are changed)
+  update(id, input2) {
+    return this.http.patch(`${this.apiUrl}/addresses/${id}`, input2).pipe(map((response) => response.data));
+  }
+  // PATCH /addresses/{id}/default (returns the whole updated list)
+  setDefault(id) {
+    return this.http.patch(`${this.apiUrl}/addresses/${id}/default`, {}).pipe(map((response) => response.data));
+  }
+  // DELETE /addresses/{id}
+  remove(id) {
+    return this.http.delete(`${this.apiUrl}/addresses/${id}`);
+  }
+  static \u0275fac = function AddressService_Factory(__ngFactoryType__) {
+    return new (__ngFactoryType__ || _AddressService)();
+  };
+  static \u0275prov = /* @__PURE__ */ \u0275\u0275defineInjectable({ token: _AddressService, factory: _AddressService.\u0275fac, providedIn: "root" });
+};
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(AddressService, [{
+    type: Injectable,
+    args: [{
+      providedIn: "root"
+    }]
+  }], null, null);
+})();
+
+// src/app/services/delivery.service.ts
+var DeliveryService = class _DeliveryService {
+  http = inject2(HttpClient);
+  apiUrl = environment.apiUrl;
+  // GET /delivery/zones (public): the zones we deliver to, with their fees
+  getZones() {
+    return this.http.get(`${this.apiUrl}/delivery/zones`).pipe(map((response) => response.data));
+  }
+  // The provinces we deliver to, for the address form's dropdown (Phnom Penh first)
+  getProvinces() {
+    return this.getZones().pipe(map((zones) => {
+      const provinces = zones.flatMap((zone) => zone.provinces ?? []);
+      return [...new Set(provinces)].sort((a, b) => {
+        if (a === "Phnom Penh")
+          return -1;
+        if (b === "Phnom Penh")
+          return 1;
+        return a.localeCompare(b);
+      });
+    }));
+  }
+  // GET /delivery/quote?address_id=1 (needs a login).
+  // The server works out the fee and total from the saved cart, never from the browser.
+  getQuote(addressId) {
+    const params = new HttpParams().set("address_id", addressId);
+    return this.http.get(`${this.apiUrl}/delivery/quote`, { params }).pipe(map((response) => response.data));
+  }
+  static \u0275fac = function DeliveryService_Factory(__ngFactoryType__) {
+    return new (__ngFactoryType__ || _DeliveryService)();
+  };
+  static \u0275prov = /* @__PURE__ */ \u0275\u0275defineInjectable({ token: _DeliveryService, factory: _DeliveryService.\u0275fac, providedIn: "root" });
+};
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(DeliveryService, [{
+    type: Injectable,
+    args: [{
+      providedIn: "root"
+    }]
+  }], null, null);
+})();
+
+// src/app/utils/api-error.ts
+function apiErrorMessages(error) {
+  if (error instanceof HttpErrorResponse) {
+    if (error.status === 0) {
+      return ["Cannot reach the server. Please try again later."];
+    }
+    if (error.status === 404) {
+      return ["We could not find that. It may have been removed."];
+    }
+    const errors = error.error?.errors;
+    if (errors && typeof errors === "object") {
+      const all = Object.values(errors).flat();
+      if (all.length > 0) {
+        return all;
+      }
+    }
+    if (error.error?.message) {
+      return [error.error.message];
+    }
+    return ["Something went wrong. Please try again."];
+  }
+  if (error instanceof Error) {
+    return [error.message];
+  }
+  return ["Something went wrong. Please try again."];
+}
+function apiErrorMessage(error) {
+  return apiErrorMessages(error).join(" ");
+}
+
+// src/app/addresses/addresses.ts
+var _forTrack05 = ($index, $item) => $item.id;
+function Addresses_Conditional_12_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "p", 6);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r0 = \u0275\u0275nextContext();
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1("You have reached the limit of ", ctx_r0.maxAddresses, " addresses. Delete one to add another.");
+  }
+}
+function Addresses_Conditional_13_Conditional_9_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "small", 15);
+    \u0275\u0275text(1, "Please give this address a label.");
+    \u0275\u0275elementEnd();
+  }
+}
+function Addresses_Conditional_13_Conditional_10_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "small", 15);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r0 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate(ctx_r0.serverError("label"));
+  }
+}
+function Addresses_Conditional_13_Conditional_15_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "small", 15);
+    \u0275\u0275text(1, "Please enter the recipient's name.");
+    \u0275\u0275elementEnd();
+  }
+}
+function Addresses_Conditional_13_Conditional_16_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "small", 15);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r0 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate(ctx_r0.serverError("recipient_name"));
+  }
+}
+function Addresses_Conditional_13_Conditional_21_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "small", 15);
+    \u0275\u0275text(1, "Please enter a valid phone number, for example 012 345 678.");
+    \u0275\u0275elementEnd();
+  }
+}
+function Addresses_Conditional_13_Conditional_22_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "small", 15);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r0 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate(ctx_r0.serverError("phone"));
+  }
+}
+function Addresses_Conditional_13_For_30_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "option", 20);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const province_r3 = ctx.$implicit;
+    \u0275\u0275property("value", province_r3);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate(province_r3);
+  }
+}
+function Addresses_Conditional_13_Conditional_31_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "small", 15);
+    \u0275\u0275text(1, "Please choose a province.");
+    \u0275\u0275elementEnd();
+  }
+}
+function Addresses_Conditional_13_Conditional_32_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "small", 15);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r0 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate(ctx_r0.serverError("province"));
+  }
+}
+function Addresses_Conditional_13_Conditional_37_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "small", 15);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r0 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate(ctx_r0.serverError("district"));
+  }
+}
+function Addresses_Conditional_13_Conditional_42_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "small", 15);
+    \u0275\u0275text(1, "Please enter the street address.");
+    \u0275\u0275elementEnd();
+  }
+}
+function Addresses_Conditional_13_Conditional_43_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "small", 15);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r0 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate(ctx_r0.serverError("address_line"));
+  }
+}
+function Addresses_Conditional_13_Conditional_44_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "label", 24);
+    \u0275\u0275element(1, "input", 29);
+    \u0275\u0275elementStart(2, "span");
+    \u0275\u0275text(3, "Use as my default address");
+    \u0275\u0275elementEnd()();
+  }
+}
+function Addresses_Conditional_13_Conditional_45_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "p", 25);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r0 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate(ctx_r0.formError());
+  }
+}
+function Addresses_Conditional_13_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r2 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "section", 7)(1, "h2");
+    \u0275\u0275text(2);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "form", 12);
+    \u0275\u0275listener("ngSubmit", function Addresses_Conditional_13_Template_form_ngSubmit_3_listener() {
+      \u0275\u0275restoreView(_r2);
+      const ctx_r0 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r0.save());
+    });
+    \u0275\u0275elementStart(4, "div", 13)(5, "label")(6, "span");
+    \u0275\u0275text(7, "Label");
+    \u0275\u0275elementEnd();
+    \u0275\u0275element(8, "input", 14);
+    \u0275\u0275conditionalCreate(9, Addresses_Conditional_13_Conditional_9_Template, 2, 0, "small", 15);
+    \u0275\u0275conditionalCreate(10, Addresses_Conditional_13_Conditional_10_Template, 2, 1, "small", 15);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(11, "label")(12, "span");
+    \u0275\u0275text(13, "Recipient name");
+    \u0275\u0275elementEnd();
+    \u0275\u0275element(14, "input", 16);
+    \u0275\u0275conditionalCreate(15, Addresses_Conditional_13_Conditional_15_Template, 2, 0, "small", 15);
+    \u0275\u0275conditionalCreate(16, Addresses_Conditional_13_Conditional_16_Template, 2, 1, "small", 15);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(17, "label")(18, "span");
+    \u0275\u0275text(19, "Phone");
+    \u0275\u0275elementEnd();
+    \u0275\u0275element(20, "input", 17);
+    \u0275\u0275conditionalCreate(21, Addresses_Conditional_13_Conditional_21_Template, 2, 0, "small", 15);
+    \u0275\u0275conditionalCreate(22, Addresses_Conditional_13_Conditional_22_Template, 2, 1, "small", 15);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(23, "label")(24, "span");
+    \u0275\u0275text(25, "Province");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(26, "select", 18)(27, "option", 19);
+    \u0275\u0275text(28, "Choose a province");
+    \u0275\u0275elementEnd();
+    \u0275\u0275repeaterCreate(29, Addresses_Conditional_13_For_30_Template, 2, 2, "option", 20, \u0275\u0275repeaterTrackByIdentity);
+    \u0275\u0275elementEnd();
+    \u0275\u0275conditionalCreate(31, Addresses_Conditional_13_Conditional_31_Template, 2, 0, "small", 15);
+    \u0275\u0275conditionalCreate(32, Addresses_Conditional_13_Conditional_32_Template, 2, 1, "small", 15);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(33, "label")(34, "span");
+    \u0275\u0275text(35, "District (optional)");
+    \u0275\u0275elementEnd();
+    \u0275\u0275element(36, "input", 21);
+    \u0275\u0275conditionalCreate(37, Addresses_Conditional_13_Conditional_37_Template, 2, 1, "small", 15);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(38, "label", 22)(39, "span");
+    \u0275\u0275text(40, "Street, house number and landmarks");
+    \u0275\u0275elementEnd();
+    \u0275\u0275element(41, "textarea", 23);
+    \u0275\u0275conditionalCreate(42, Addresses_Conditional_13_Conditional_42_Template, 2, 0, "small", 15);
+    \u0275\u0275conditionalCreate(43, Addresses_Conditional_13_Conditional_43_Template, 2, 1, "small", 15);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275conditionalCreate(44, Addresses_Conditional_13_Conditional_44_Template, 4, 0, "label", 24);
+    \u0275\u0275conditionalCreate(45, Addresses_Conditional_13_Conditional_45_Template, 2, 1, "p", 25);
+    \u0275\u0275elementStart(46, "div", 26)(47, "button", 27);
+    \u0275\u0275text(48);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(49, "button", 28);
+    \u0275\u0275listener("click", function Addresses_Conditional_13_Template_button_click_49_listener() {
+      \u0275\u0275restoreView(_r2);
+      const ctx_r0 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r0.closeForm());
+    });
+    \u0275\u0275text(50, " Cancel ");
+    \u0275\u0275elementEnd()()()();
+  }
+  if (rf & 2) {
+    const ctx_r0 = \u0275\u0275nextContext();
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate(ctx_r0.editingId() === null ? "New address" : "Edit address");
+    \u0275\u0275advance();
+    \u0275\u0275property("formGroup", ctx_r0.form);
+    \u0275\u0275advance(6);
+    \u0275\u0275conditional(ctx_r0.form.controls.label.touched && ctx_r0.form.controls.label.invalid ? 9 : -1);
+    \u0275\u0275advance();
+    \u0275\u0275conditional(ctx_r0.serverError("label") ? 10 : -1);
+    \u0275\u0275advance(5);
+    \u0275\u0275conditional(ctx_r0.form.controls.recipient_name.touched && ctx_r0.form.controls.recipient_name.invalid ? 15 : -1);
+    \u0275\u0275advance();
+    \u0275\u0275conditional(ctx_r0.serverError("recipient_name") ? 16 : -1);
+    \u0275\u0275advance(5);
+    \u0275\u0275conditional(ctx_r0.form.controls.phone.touched && ctx_r0.form.controls.phone.invalid ? 21 : -1);
+    \u0275\u0275advance();
+    \u0275\u0275conditional(ctx_r0.serverError("phone") ? 22 : -1);
+    \u0275\u0275advance(7);
+    \u0275\u0275repeater(ctx_r0.provinces());
+    \u0275\u0275advance(2);
+    \u0275\u0275conditional(ctx_r0.form.controls.province.touched && ctx_r0.form.controls.province.invalid ? 31 : -1);
+    \u0275\u0275advance();
+    \u0275\u0275conditional(ctx_r0.serverError("province") ? 32 : -1);
+    \u0275\u0275advance(5);
+    \u0275\u0275conditional(ctx_r0.serverError("district") ? 37 : -1);
+    \u0275\u0275advance(5);
+    \u0275\u0275conditional(ctx_r0.form.controls.address_line.touched && ctx_r0.form.controls.address_line.invalid ? 42 : -1);
+    \u0275\u0275advance();
+    \u0275\u0275conditional(ctx_r0.serverError("address_line") ? 43 : -1);
+    \u0275\u0275advance();
+    \u0275\u0275conditional(!ctx_r0.editingTheDefault() && ctx_r0.addresses().length > 0 ? 44 : -1);
+    \u0275\u0275advance();
+    \u0275\u0275conditional(ctx_r0.formError() ? 45 : -1);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("disabled", ctx_r0.saving());
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(" ", ctx_r0.saving() ? "Saving..." : "Save address", " ");
+    \u0275\u0275advance();
+    \u0275\u0275property("disabled", ctx_r0.saving());
+  }
+}
+function Addresses_Conditional_14_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "p", 8);
+    \u0275\u0275text(1, "Loading your addresses...");
+    \u0275\u0275elementEnd();
+  }
+}
+function Addresses_Conditional_15_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "p", 9);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r0 = \u0275\u0275nextContext();
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate(ctx_r0.loadError());
+  }
+}
+function Addresses_Conditional_16_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "section", 10)(1, "div", 30);
+    \u0275\u0275element(2, "i", 31);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "h2");
+    \u0275\u0275text(4, "No addresses yet");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(5, "p");
+    \u0275\u0275text(6, "Add your first address to speed up checkout.");
+    \u0275\u0275elementEnd()();
+  }
+}
+function Addresses_Conditional_17_For_2_Conditional_4_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 34);
+    \u0275\u0275text(1, "Default");
+    \u0275\u0275elementEnd();
+  }
+}
+function Addresses_Conditional_17_For_2_Conditional_10_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275text(0);
+  }
+  if (rf & 2) {
+    const address_r5 = \u0275\u0275nextContext().$implicit;
+    \u0275\u0275textInterpolate1(" ", address_r5.district, ", ");
+  }
+}
+function Addresses_Conditional_17_For_2_Conditional_13_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r6 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 39);
+    \u0275\u0275listener("click", function Addresses_Conditional_17_For_2_Conditional_13_Template_button_click_0_listener() {
+      \u0275\u0275restoreView(_r6);
+      const address_r5 = \u0275\u0275nextContext().$implicit;
+      const ctx_r0 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r0.setDefault(address_r5));
+    });
+    \u0275\u0275text(1, "Set as default");
+    \u0275\u0275elementEnd();
+  }
+}
+function Addresses_Conditional_17_For_2_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r4 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "article", 32)(1, "div", 33)(2, "strong");
+    \u0275\u0275text(3);
+    \u0275\u0275elementEnd();
+    \u0275\u0275conditionalCreate(4, Addresses_Conditional_17_For_2_Conditional_4_Template, 2, 0, "span", 34);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(5, "p", 35);
+    \u0275\u0275text(6);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(7, "p", 36);
+    \u0275\u0275text(8);
+    \u0275\u0275element(9, "br");
+    \u0275\u0275conditionalCreate(10, Addresses_Conditional_17_For_2_Conditional_10_Template, 1, 1);
+    \u0275\u0275text(11);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(12, "div", 37);
+    \u0275\u0275conditionalCreate(13, Addresses_Conditional_17_For_2_Conditional_13_Template, 2, 0, "button", 38);
+    \u0275\u0275elementStart(14, "button", 39);
+    \u0275\u0275listener("click", function Addresses_Conditional_17_For_2_Template_button_click_14_listener() {
+      const address_r5 = \u0275\u0275restoreView(_r4).$implicit;
+      const ctx_r0 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r0.openEdit(address_r5));
+    });
+    \u0275\u0275text(15, "Edit");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(16, "button", 40);
+    \u0275\u0275listener("click", function Addresses_Conditional_17_For_2_Template_button_click_16_listener() {
+      const address_r5 = \u0275\u0275restoreView(_r4).$implicit;
+      const ctx_r0 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r0.remove(address_r5));
+    });
+    \u0275\u0275text(17, "Delete");
+    \u0275\u0275elementEnd()()();
+  }
+  if (rf & 2) {
+    const address_r5 = ctx.$implicit;
+    \u0275\u0275advance(3);
+    \u0275\u0275textInterpolate(address_r5.label);
+    \u0275\u0275advance();
+    \u0275\u0275conditional(address_r5.is_default ? 4 : -1);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate2("", address_r5.recipient_name, " \xB7 ", address_r5.phone);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1(" ", address_r5.address_line);
+    \u0275\u0275advance(2);
+    \u0275\u0275conditional(address_r5.district ? 10 : -1);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1("", address_r5.province, " ");
+    \u0275\u0275advance(2);
+    \u0275\u0275conditional(!address_r5.is_default ? 13 : -1);
+  }
+}
+function Addresses_Conditional_17_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 11);
+    \u0275\u0275repeaterCreate(1, Addresses_Conditional_17_For_2_Template, 18, 8, "article", 32, _forTrack05);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r0 = \u0275\u0275nextContext();
+    \u0275\u0275advance();
+    \u0275\u0275repeater(ctx_r0.addresses());
+  }
+}
+var Addresses = class _Addresses {
+  fb = inject2(FormBuilder);
+  addressService = inject2(AddressService);
+  deliveryService = inject2(DeliveryService);
+  // The most addresses one customer can save (same limit as the API)
+  maxAddresses = 10;
+  // Signals: the template updates automatically when they change
+  addresses = signal([], ...ngDevMode ? [{ debugName: "addresses" }] : []);
+  provinces = signal([], ...ngDevMode ? [{ debugName: "provinces" }] : []);
+  loading = signal(true, ...ngDevMode ? [{ debugName: "loading" }] : []);
+  loadError = signal("", ...ngDevMode ? [{ debugName: "loadError" }] : []);
+  showForm = signal(false, ...ngDevMode ? [{ debugName: "showForm" }] : []);
+  editingId = signal(null, ...ngDevMode ? [{ debugName: "editingId" }] : []);
+  // null = adding a new address
+  saving = signal(false, ...ngDevMode ? [{ debugName: "saving" }] : []);
+  formError = signal("", ...ngDevMode ? [{ debugName: "formError" }] : []);
+  serverErrors = signal({}, ...ngDevMode ? [{ debugName: "serverErrors" }] : []);
+  // The form and its rules (checked in the browser before anything is sent)
+  form = this.fb.nonNullable.group({
+    label: ["", [Validators.required, Validators.maxLength(50)]],
+    recipient_name: ["", [Validators.required, Validators.maxLength(255)]],
+    phone: [
+      "",
+      [Validators.required, Validators.pattern(/^\+?[0-9 \-]{8,20}$/)]
+    ],
+    province: ["", [Validators.required]],
+    district: ["", [Validators.maxLength(255)]],
+    address_line: ["", [Validators.required, Validators.maxLength(500)]],
+    is_default: [false]
+  });
+  ngOnInit() {
+    this.loadAddresses();
+    this.deliveryService.getProvinces().subscribe({
+      next: (provinces) => this.provinces.set(provinces),
+      error: (err) => console.error("Error loading provinces:", err)
+    });
+  }
+  loadAddresses() {
+    this.loading.set(true);
+    this.loadError.set("");
+    this.addressService.list().pipe(finalize(() => this.loading.set(false))).subscribe({
+      next: (addresses) => this.addresses.set(addresses),
+      error: (err) => this.loadError.set(apiErrorMessage(err))
+    });
+  }
+  // Open the empty form
+  openAdd() {
+    this.editingId.set(null);
+    this.form.reset({
+      label: "",
+      recipient_name: "",
+      phone: "",
+      province: "",
+      district: "",
+      address_line: "",
+      is_default: false
+    });
+    this.clearErrors();
+    this.showForm.set(true);
+  }
+  // Open the form filled with an existing address
+  openEdit(address) {
+    if (!this.provinces().includes(address.province)) {
+      this.provinces.update((list) => [...list, address.province]);
+    }
+    this.editingId.set(address.id);
+    this.form.reset({
+      label: address.label,
+      recipient_name: address.recipient_name,
+      phone: address.phone,
+      province: address.province,
+      district: address.district ?? "",
+      address_line: address.address_line,
+      is_default: address.is_default
+    });
+    this.clearErrors();
+    this.showForm.set(true);
+  }
+  closeForm() {
+    this.showForm.set(false);
+    this.editingId.set(null);
+    this.clearErrors();
+  }
+  // True when the form is editing the address that is currently the default
+  editingTheDefault() {
+    const id = this.editingId();
+    return id !== null && this.addresses().some((a) => a.id === id && a.is_default);
+  }
+  save() {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    this.saving.set(true);
+    this.clearErrors();
+    const value = this.form.getRawValue();
+    const input2 = __spreadProps(__spreadValues({}, value), { district: value.district.trim() || null });
+    const id = this.editingId();
+    const request = id === null ? this.addressService.create(input2) : this.addressService.update(id, input2);
+    request.pipe(finalize(() => this.saving.set(false))).subscribe({
+      next: () => {
+        showToast("success", id === null ? "Address saved" : "Address updated");
+        this.closeForm();
+        this.loadAddresses();
+      },
+      error: (err) => this.handleSaveError(err)
+    });
+  }
+  setDefault(address) {
+    this.addressService.setDefault(address.id).subscribe({
+      next: (addresses) => {
+        this.addresses.set(addresses);
+        showToast("success", "Default address updated");
+      },
+      error: (err) => showToast("error", apiErrorMessage(err))
+    });
+  }
+  remove(address) {
+    import_sweetalert24.default.fire({
+      title: "Delete this address?",
+      text: `${address.label}: ${address.address_line}`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it"
+    }).then((result) => {
+      if (!result.isConfirmed) {
+        return;
+      }
+      this.addressService.remove(address.id).subscribe({
+        next: () => {
+          showToast("success", "Address deleted");
+          this.loadAddresses();
+        },
+        error: (err) => showToast("error", apiErrorMessage(err))
+      });
+    });
+  }
+  // First API message for a field, or an empty text
+  serverError(field) {
+    return this.serverErrors()[field]?.[0] ?? "";
+  }
+  handleSaveError(err) {
+    if (err instanceof HttpErrorResponse && err.status === 422 && err.error?.errors) {
+      this.serverErrors.set(err.error.errors);
+    } else {
+      this.formError.set(apiErrorMessage(err));
+    }
+  }
+  clearErrors() {
+    this.formError.set("");
+    this.serverErrors.set({});
+  }
+  static \u0275fac = function Addresses_Factory(__ngFactoryType__) {
+    return new (__ngFactoryType__ || _Addresses)();
+  };
+  static \u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _Addresses, selectors: [["app-addresses"]], decls: 18, vars: 4, consts: [[1, "addresses-page", "container", "py-4", "py-lg-5"], [1, "addresses-heading"], [1, "eyebrow"], [1, "addresses-subtitle"], ["type", "button", 1, "primary-button", 3, "click", "disabled"], [1, "bi", "bi-plus-lg"], [1, "limit-note"], [1, "address-form-card"], [1, "text-center", "py-5"], [1, "text-center", "py-5", "text-danger"], [1, "empty-addresses"], [1, "address-list"], ["novalidate", "", 3, "ngSubmit", "formGroup"], [1, "form-grid"], ["type", "text", "formControlName", "label", "placeholder", "Home, Office..."], [1, "field-error"], ["type", "text", "formControlName", "recipient_name", "autocomplete", "name"], ["type", "tel", "formControlName", "phone", "autocomplete", "tel", "placeholder", "012 345 678"], ["formControlName", "province"], ["value", "", "disabled", ""], [3, "value"], ["type", "text", "formControlName", "district"], [1, "full-row"], ["formControlName", "address_line", "rows", "2"], [1, "check-row"], ["role", "alert", 1, "form-error"], [1, "form-actions"], ["type", "submit", 1, "primary-button", 3, "disabled"], ["type", "button", 1, "ghost-button", 3, "click", "disabled"], ["type", "checkbox", "formControlName", "is_default"], [1, "empty-icon"], [1, "bi", "bi-geo-alt"], [1, "address-card"], [1, "address-top"], [1, "default-badge"], [1, "address-name"], [1, "address-text"], [1, "address-actions"], ["type", "button", 1, "link-button"], ["type", "button", 1, "link-button", 3, "click"], ["type", "button", 1, "link-button", "danger", 3, "click"]], template: function Addresses_Template(rf, ctx) {
+    if (rf & 1) {
+      \u0275\u0275elementStart(0, "main", 0)(1, "div", 1)(2, "div")(3, "p", 2);
+      \u0275\u0275text(4, "Your account");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(5, "h1");
+      \u0275\u0275text(6, "My addresses");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(7, "p", 3);
+      \u0275\u0275text(8, "Where should we deliver your orders?");
+      \u0275\u0275elementEnd()();
+      \u0275\u0275elementStart(9, "button", 4);
+      \u0275\u0275listener("click", function Addresses_Template_button_click_9_listener() {
+        return ctx.openAdd();
+      });
+      \u0275\u0275element(10, "i", 5);
+      \u0275\u0275text(11, " Add address ");
+      \u0275\u0275elementEnd()();
+      \u0275\u0275conditionalCreate(12, Addresses_Conditional_12_Template, 2, 1, "p", 6);
+      \u0275\u0275conditionalCreate(13, Addresses_Conditional_13_Template, 51, 18, "section", 7);
+      \u0275\u0275conditionalCreate(14, Addresses_Conditional_14_Template, 2, 0, "p", 8)(15, Addresses_Conditional_15_Template, 2, 1, "p", 9)(16, Addresses_Conditional_16_Template, 7, 0, "section", 10)(17, Addresses_Conditional_17_Template, 3, 0, "div", 11);
+      \u0275\u0275elementEnd();
+    }
+    if (rf & 2) {
+      \u0275\u0275advance(9);
+      \u0275\u0275property("disabled", ctx.addresses().length >= ctx.maxAddresses);
+      \u0275\u0275advance(3);
+      \u0275\u0275conditional(ctx.addresses().length >= ctx.maxAddresses ? 12 : -1);
+      \u0275\u0275advance();
+      \u0275\u0275conditional(ctx.showForm() ? 13 : -1);
+      \u0275\u0275advance();
+      \u0275\u0275conditional(ctx.loading() ? 14 : ctx.loadError() ? 15 : ctx.addresses().length === 0 && !ctx.showForm() ? 16 : 17);
+    }
+  }, dependencies: [ReactiveFormsModule, \u0275NgNoValidate, NgSelectOption, \u0275NgSelectMultipleOption, DefaultValueAccessor, CheckboxControlValueAccessor, SelectControlValueAccessor, NgControlStatus, NgControlStatusGroup, FormGroupDirective, FormControlName], styles: ["\n\n.addresses-heading[_ngcontent-%COMP%] {\n  align-items: flex-end;\n  display: flex;\n  flex-wrap: wrap;\n  gap: 1rem;\n  justify-content: space-between;\n  margin-bottom: 1.5rem;\n}\n.addresses-heading[_ngcontent-%COMP%]   h1[_ngcontent-%COMP%] {\n  color: var(--ink);\n  margin-bottom: 0.25rem;\n}\n.addresses-subtitle[_ngcontent-%COMP%] {\n  color: var(--muted);\n  font-size: 0.9rem;\n  margin: 0;\n}\n.limit-note[_ngcontent-%COMP%] {\n  color: var(--muted);\n  font-size: 0.8rem;\n  margin: -0.75rem 0 1.25rem;\n}\n.address-form-card[_ngcontent-%COMP%], \n.address-card[_ngcontent-%COMP%], \n.empty-addresses[_ngcontent-%COMP%] {\n  background: var(--surface);\n  border: 1px solid var(--line);\n  border-radius: 14px;\n  box-shadow: 0 8px 22px rgb(23 32 51 / 0.04);\n}\n.address-form-card[_ngcontent-%COMP%] {\n  margin-bottom: 1.75rem;\n  padding: 1.5rem;\n}\n.address-form-card[_ngcontent-%COMP%]   h2[_ngcontent-%COMP%] {\n  color: var(--ink);\n  font-size: 1.15rem;\n  margin-bottom: 1.1rem;\n}\n.form-grid[_ngcontent-%COMP%] {\n  display: grid;\n  gap: 1rem;\n  grid-template-columns: repeat(2, minmax(0, 1fr));\n}\n.form-grid[_ngcontent-%COMP%]   label[_ngcontent-%COMP%], \n.check-row[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: column;\n  gap: 0.35rem;\n}\n.full-row[_ngcontent-%COMP%] {\n  grid-column: 1 / -1;\n}\n.form-grid[_ngcontent-%COMP%]   label[_ngcontent-%COMP%]   span[_ngcontent-%COMP%] {\n  color: var(--muted);\n  font-size: 0.7rem;\n  font-weight: 700;\n  letter-spacing: 0.06em;\n  text-transform: uppercase;\n}\n.form-grid[_ngcontent-%COMP%]   input[_ngcontent-%COMP%], \n.form-grid[_ngcontent-%COMP%]   select[_ngcontent-%COMP%], \n.form-grid[_ngcontent-%COMP%]   textarea[_ngcontent-%COMP%] {\n  background: var(--surface);\n  border: 1px solid var(--line);\n  border-radius: 8px;\n  color: var(--ink);\n  font-size: 0.9rem;\n  padding: 0.65rem 0.75rem;\n}\n.form-grid[_ngcontent-%COMP%]   input[_ngcontent-%COMP%]:focus, \n.form-grid[_ngcontent-%COMP%]   select[_ngcontent-%COMP%]:focus, \n.form-grid[_ngcontent-%COMP%]   textarea[_ngcontent-%COMP%]:focus {\n  border-color: var(--accent);\n  outline: none;\n}\n.check-row[_ngcontent-%COMP%] {\n  align-items: center;\n  flex-direction: row;\n  gap: 0.5rem;\n  margin: 1rem 0 0;\n}\n.check-row[_ngcontent-%COMP%]   input[_ngcontent-%COMP%] {\n  accent-color: var(--accent);\n  height: 17px;\n  width: 17px;\n}\n.check-row[_ngcontent-%COMP%]   span[_ngcontent-%COMP%] {\n  color: var(--ink);\n  font-size: 0.85rem;\n}\n.field-error[_ngcontent-%COMP%] {\n  color: #c0392b;\n  font-size: 0.78rem;\n}\n.form-error[_ngcontent-%COMP%] {\n  background: #fdecea;\n  border-radius: 8px;\n  color: #c0392b;\n  font-size: 0.85rem;\n  margin: 1rem 0 0;\n  padding: 0.7rem 0.85rem;\n}\n.form-actions[_ngcontent-%COMP%] {\n  display: flex;\n  gap: 0.75rem;\n  margin-top: 1.25rem;\n}\n.primary-button[_ngcontent-%COMP%] {\n  background: var(--ink);\n  border: 0;\n  border-radius: 8px;\n  color: white;\n  cursor: pointer;\n  font-size: 0.82rem;\n  font-weight: 700;\n  padding: 0.7rem 1.1rem;\n}\n.primary-button[_ngcontent-%COMP%]:hover:not(:disabled) {\n  background: var(--accent);\n}\n.ghost-button[_ngcontent-%COMP%] {\n  background: transparent;\n  border: 1px solid var(--line);\n  border-radius: 8px;\n  color: var(--ink);\n  cursor: pointer;\n  font-size: 0.82rem;\n  font-weight: 700;\n  padding: 0.7rem 1.1rem;\n}\n.primary-button[_ngcontent-%COMP%]:disabled, \n.ghost-button[_ngcontent-%COMP%]:disabled {\n  cursor: not-allowed;\n  opacity: 0.5;\n}\n.address-list[_ngcontent-%COMP%] {\n  display: grid;\n  gap: 1.1rem;\n  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));\n}\n.address-card[_ngcontent-%COMP%] {\n  padding: 1.25rem;\n}\n.address-top[_ngcontent-%COMP%] {\n  align-items: center;\n  display: flex;\n  gap: 0.6rem;\n  margin-bottom: 0.6rem;\n}\n.address-top[_ngcontent-%COMP%]   strong[_ngcontent-%COMP%] {\n  color: var(--ink);\n}\n.default-badge[_ngcontent-%COMP%] {\n  background: #fdeee9;\n  border-radius: 999px;\n  color: var(--accent);\n  font-size: 0.65rem;\n  font-weight: 700;\n  letter-spacing: 0.06em;\n  padding: 0.25rem 0.6rem;\n  text-transform: uppercase;\n}\n.address-name[_ngcontent-%COMP%] {\n  color: var(--ink);\n  font-size: 0.85rem;\n  font-weight: 700;\n  margin: 0 0 0.3rem;\n}\n.address-text[_ngcontent-%COMP%] {\n  color: var(--muted);\n  font-size: 0.82rem;\n  margin: 0 0 1rem;\n}\n.address-actions[_ngcontent-%COMP%] {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 1rem;\n}\n.link-button[_ngcontent-%COMP%] {\n  background: none;\n  border: 0;\n  color: var(--accent);\n  cursor: pointer;\n  font-size: 0.78rem;\n  font-weight: 700;\n  padding: 0;\n}\n.link-button.danger[_ngcontent-%COMP%] {\n  color: #c0392b;\n}\n.empty-addresses[_ngcontent-%COMP%] {\n  padding: 3rem 1.5rem;\n  text-align: center;\n}\n.empty-icon[_ngcontent-%COMP%] {\n  color: var(--muted);\n  font-size: 2rem;\n  margin-bottom: 0.5rem;\n}\n@media (max-width: 767px) {\n  .form-grid[_ngcontent-%COMP%] {\n    grid-template-columns: 1fr;\n  }\n}\n/*# sourceMappingURL=addresses.css.map */"] });
+};
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(Addresses, [{
+    type: Component,
+    args: [{ selector: "app-addresses", imports: [ReactiveFormsModule], template: `<main class="addresses-page container py-4 py-lg-5">\r
+  <div class="addresses-heading">\r
+    <div>\r
+      <p class="eyebrow">Your account</p>\r
+      <h1>My addresses</h1>\r
+      <p class="addresses-subtitle">Where should we deliver your orders?</p>\r
+    </div>\r
+    <button\r
+      type="button"\r
+      class="primary-button"\r
+      (click)="openAdd()"\r
+      [disabled]="addresses().length >= maxAddresses"\r
+    >\r
+      <i class="bi bi-plus-lg"></i> Add address\r
+    </button>\r
+  </div>\r
+\r
+  @if (addresses().length >= maxAddresses) {\r
+    <p class="limit-note">You have reached the limit of {{ maxAddresses }} addresses. Delete one to add another.</p>\r
+  }\r
+\r
+  @if (showForm()) {\r
+    <section class="address-form-card">\r
+      <h2>{{ editingId() === null ? 'New address' : 'Edit address' }}</h2>\r
+\r
+      <form [formGroup]="form" (ngSubmit)="save()" novalidate>\r
+        <div class="form-grid">\r
+          <label>\r
+            <span>Label</span>\r
+            <input type="text" formControlName="label" placeholder="Home, Office..." />\r
+            @if (form.controls.label.touched && form.controls.label.invalid) {\r
+              <small class="field-error">Please give this address a label.</small>\r
+            }\r
+            @if (serverError('label')) {\r
+              <small class="field-error">{{ serverError('label') }}</small>\r
+            }\r
+          </label>\r
+\r
+          <label>\r
+            <span>Recipient name</span>\r
+            <input type="text" formControlName="recipient_name" autocomplete="name" />\r
+            @if (form.controls.recipient_name.touched && form.controls.recipient_name.invalid) {\r
+              <small class="field-error">Please enter the recipient's name.</small>\r
+            }\r
+            @if (serverError('recipient_name')) {\r
+              <small class="field-error">{{ serverError('recipient_name') }}</small>\r
+            }\r
+          </label>\r
+\r
+          <label>\r
+            <span>Phone</span>\r
+            <input type="tel" formControlName="phone" autocomplete="tel" placeholder="012 345 678" />\r
+            @if (form.controls.phone.touched && form.controls.phone.invalid) {\r
+              <small class="field-error">Please enter a valid phone number, for example 012 345 678.</small>\r
+            }\r
+            @if (serverError('phone')) {\r
+              <small class="field-error">{{ serverError('phone') }}</small>\r
+            }\r
+          </label>\r
+\r
+          <label>\r
+            <span>Province</span>\r
+            <select formControlName="province">\r
+              <option value="" disabled>Choose a province</option>\r
+              @for (province of provinces(); track province) {\r
+                <option [value]="province">{{ province }}</option>\r
+              }\r
+            </select>\r
+            @if (form.controls.province.touched && form.controls.province.invalid) {\r
+              <small class="field-error">Please choose a province.</small>\r
+            }\r
+            @if (serverError('province')) {\r
+              <small class="field-error">{{ serverError('province') }}</small>\r
+            }\r
+          </label>\r
+\r
+          <label>\r
+            <span>District (optional)</span>\r
+            <input type="text" formControlName="district" />\r
+            @if (serverError('district')) {\r
+              <small class="field-error">{{ serverError('district') }}</small>\r
+            }\r
+          </label>\r
+\r
+          <label class="full-row">\r
+            <span>Street, house number and landmarks</span>\r
+            <textarea formControlName="address_line" rows="2"></textarea>\r
+            @if (form.controls.address_line.touched && form.controls.address_line.invalid) {\r
+              <small class="field-error">Please enter the street address.</small>\r
+            }\r
+            @if (serverError('address_line')) {\r
+              <small class="field-error">{{ serverError('address_line') }}</small>\r
+            }\r
+          </label>\r
+        </div>\r
+\r
+        <!-- A default address cannot be switched off: choose another one as the default instead -->\r
+        @if (!editingTheDefault() && addresses().length > 0) {\r
+          <label class="check-row">\r
+            <input type="checkbox" formControlName="is_default" />\r
+            <span>Use as my default address</span>\r
+          </label>\r
+        }\r
+\r
+        @if (formError()) {\r
+          <p class="form-error" role="alert">{{ formError() }}</p>\r
+        }\r
+\r
+        <div class="form-actions">\r
+          <button type="submit" class="primary-button" [disabled]="saving()">\r
+            {{ saving() ? 'Saving...' : 'Save address' }}\r
+          </button>\r
+          <button type="button" class="ghost-button" (click)="closeForm()" [disabled]="saving()">\r
+            Cancel\r
+          </button>\r
+        </div>\r
+      </form>\r
+    </section>\r
+  }\r
+\r
+  @if (loading()) {\r
+    <p class="text-center py-5">Loading your addresses...</p>\r
+  } @else if (loadError()) {\r
+    <p class="text-center py-5 text-danger">{{ loadError() }}</p>\r
+  } @else if (addresses().length === 0 && !showForm()) {\r
+    <section class="empty-addresses">\r
+      <div class="empty-icon"><i class="bi bi-geo-alt"></i></div>\r
+      <h2>No addresses yet</h2>\r
+      <p>Add your first address to speed up checkout.</p>\r
+    </section>\r
+  } @else {\r
+    <div class="address-list">\r
+      @for (address of addresses(); track address.id) {\r
+        <article class="address-card">\r
+          <div class="address-top">\r
+            <strong>{{ address.label }}</strong>\r
+            @if (address.is_default) {\r
+              <span class="default-badge">Default</span>\r
+            }\r
+          </div>\r
+\r
+          <p class="address-name">{{ address.recipient_name }} \xB7 {{ address.phone }}</p>\r
+          <p class="address-text">\r
+            {{ address.address_line }}<br />\r
+            @if (address.district) { {{ address.district }}, }{{ address.province }}\r
+          </p>\r
+\r
+          <div class="address-actions">\r
+            @if (!address.is_default) {\r
+              <button type="button" class="link-button" (click)="setDefault(address)">Set as default</button>\r
+            }\r
+            <button type="button" class="link-button" (click)="openEdit(address)">Edit</button>\r
+            <button type="button" class="link-button danger" (click)="remove(address)">Delete</button>\r
+          </div>\r
+        </article>\r
+      }\r
+    </div>\r
+  }\r
+</main>`, styles: ["/* src/app/addresses/addresses.css */\n.addresses-heading {\n  align-items: flex-end;\n  display: flex;\n  flex-wrap: wrap;\n  gap: 1rem;\n  justify-content: space-between;\n  margin-bottom: 1.5rem;\n}\n.addresses-heading h1 {\n  color: var(--ink);\n  margin-bottom: 0.25rem;\n}\n.addresses-subtitle {\n  color: var(--muted);\n  font-size: 0.9rem;\n  margin: 0;\n}\n.limit-note {\n  color: var(--muted);\n  font-size: 0.8rem;\n  margin: -0.75rem 0 1.25rem;\n}\n.address-form-card,\n.address-card,\n.empty-addresses {\n  background: var(--surface);\n  border: 1px solid var(--line);\n  border-radius: 14px;\n  box-shadow: 0 8px 22px rgb(23 32 51 / 0.04);\n}\n.address-form-card {\n  margin-bottom: 1.75rem;\n  padding: 1.5rem;\n}\n.address-form-card h2 {\n  color: var(--ink);\n  font-size: 1.15rem;\n  margin-bottom: 1.1rem;\n}\n.form-grid {\n  display: grid;\n  gap: 1rem;\n  grid-template-columns: repeat(2, minmax(0, 1fr));\n}\n.form-grid label,\n.check-row {\n  display: flex;\n  flex-direction: column;\n  gap: 0.35rem;\n}\n.full-row {\n  grid-column: 1 / -1;\n}\n.form-grid label span {\n  color: var(--muted);\n  font-size: 0.7rem;\n  font-weight: 700;\n  letter-spacing: 0.06em;\n  text-transform: uppercase;\n}\n.form-grid input,\n.form-grid select,\n.form-grid textarea {\n  background: var(--surface);\n  border: 1px solid var(--line);\n  border-radius: 8px;\n  color: var(--ink);\n  font-size: 0.9rem;\n  padding: 0.65rem 0.75rem;\n}\n.form-grid input:focus,\n.form-grid select:focus,\n.form-grid textarea:focus {\n  border-color: var(--accent);\n  outline: none;\n}\n.check-row {\n  align-items: center;\n  flex-direction: row;\n  gap: 0.5rem;\n  margin: 1rem 0 0;\n}\n.check-row input {\n  accent-color: var(--accent);\n  height: 17px;\n  width: 17px;\n}\n.check-row span {\n  color: var(--ink);\n  font-size: 0.85rem;\n}\n.field-error {\n  color: #c0392b;\n  font-size: 0.78rem;\n}\n.form-error {\n  background: #fdecea;\n  border-radius: 8px;\n  color: #c0392b;\n  font-size: 0.85rem;\n  margin: 1rem 0 0;\n  padding: 0.7rem 0.85rem;\n}\n.form-actions {\n  display: flex;\n  gap: 0.75rem;\n  margin-top: 1.25rem;\n}\n.primary-button {\n  background: var(--ink);\n  border: 0;\n  border-radius: 8px;\n  color: white;\n  cursor: pointer;\n  font-size: 0.82rem;\n  font-weight: 700;\n  padding: 0.7rem 1.1rem;\n}\n.primary-button:hover:not(:disabled) {\n  background: var(--accent);\n}\n.ghost-button {\n  background: transparent;\n  border: 1px solid var(--line);\n  border-radius: 8px;\n  color: var(--ink);\n  cursor: pointer;\n  font-size: 0.82rem;\n  font-weight: 700;\n  padding: 0.7rem 1.1rem;\n}\n.primary-button:disabled,\n.ghost-button:disabled {\n  cursor: not-allowed;\n  opacity: 0.5;\n}\n.address-list {\n  display: grid;\n  gap: 1.1rem;\n  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));\n}\n.address-card {\n  padding: 1.25rem;\n}\n.address-top {\n  align-items: center;\n  display: flex;\n  gap: 0.6rem;\n  margin-bottom: 0.6rem;\n}\n.address-top strong {\n  color: var(--ink);\n}\n.default-badge {\n  background: #fdeee9;\n  border-radius: 999px;\n  color: var(--accent);\n  font-size: 0.65rem;\n  font-weight: 700;\n  letter-spacing: 0.06em;\n  padding: 0.25rem 0.6rem;\n  text-transform: uppercase;\n}\n.address-name {\n  color: var(--ink);\n  font-size: 0.85rem;\n  font-weight: 700;\n  margin: 0 0 0.3rem;\n}\n.address-text {\n  color: var(--muted);\n  font-size: 0.82rem;\n  margin: 0 0 1rem;\n}\n.address-actions {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 1rem;\n}\n.link-button {\n  background: none;\n  border: 0;\n  color: var(--accent);\n  cursor: pointer;\n  font-size: 0.78rem;\n  font-weight: 700;\n  padding: 0;\n}\n.link-button.danger {\n  color: #c0392b;\n}\n.empty-addresses {\n  padding: 3rem 1.5rem;\n  text-align: center;\n}\n.empty-icon {\n  color: var(--muted);\n  font-size: 2rem;\n  margin-bottom: 0.5rem;\n}\n@media (max-width: 767px) {\n  .form-grid {\n    grid-template-columns: 1fr;\n  }\n}\n/*# sourceMappingURL=addresses.css.map */\n"] }]
+  }], null, null);
+})();
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(Addresses, { className: "Addresses", filePath: "src/app/addresses/addresses.ts", lineNumber: 18 });
+})();
+
+// src/app/guards/auth.guard.ts
+var authGuard = () => {
+  const auth = inject2(AuthService);
+  const router = inject2(Router);
+  return auth.isLoggedIn() ? true : router.createUrlTree(["/login"]);
+};
+
+// src/app/checkout/checkout.ts
+var import_sweetalert25 = __toESM(require_sweetalert2_all());
+
+// src/app/services/order.service.ts
+var OrderService = class _OrderService {
+  http = inject2(HttpClient);
+  apiUrl = environment.apiUrl;
+  // A new unique key for each checkout page visit.
+  // If the same key is sent twice (a double-click or a retry), the server creates only one order.
+  newIdempotencyKey() {
+    if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+      return crypto.randomUUID();
+    }
+    return `${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`;
+  }
+  // POST /checkout
+  checkout(request) {
+    return this.http.post(`${this.apiUrl}/checkout`, request);
+  }
+  // GET /orders (the customer's own orders, newest first, 10 per page)
+  list(page = 1) {
+    const params = new HttpParams().set("page", page);
+    return this.http.get(`${this.apiUrl}/orders`, {
+      params
+    });
+  }
+  // GET /orders/{id}: one order with its items, status history and payments
+  get(id) {
+    return this.http.get(`${this.apiUrl}/orders/${id}`).pipe(map((response) => response.data));
+  }
+  // POST /orders/{id}/cancel (only a pending, unpaid order)
+  cancel(id) {
+    return this.http.post(`${this.apiUrl}/orders/${id}/cancel`, {}).pipe(map((response) => response.data));
+  }
+  static \u0275fac = function OrderService_Factory(__ngFactoryType__) {
+    return new (__ngFactoryType__ || _OrderService)();
+  };
+  static \u0275prov = /* @__PURE__ */ \u0275\u0275defineInjectable({ token: _OrderService, factory: _OrderService.\u0275fac, providedIn: "root" });
+};
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(OrderService, [{
+    type: Injectable,
+    args: [{
+      providedIn: "root"
+    }]
+  }], null, null);
+})();
+
+// src/app/checkout/checkout.ts
+var _c04 = () => ["KHQR", "ABA", "ACLEDA"];
+var _forTrack06 = ($index, $item) => $item.id;
+function Checkout_Conditional_6_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "p", 3);
+    \u0275\u0275text(1, "Loading your checkout...");
+    \u0275\u0275elementEnd();
+  }
+}
+function Checkout_Conditional_7_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "p", 4);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r0 = \u0275\u0275nextContext();
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate(ctx_r0.loadError());
+  }
+}
+function Checkout_Conditional_8_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "section", 5)(1, "h2");
+    \u0275\u0275text(2, "Your cart is empty");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "p");
+    \u0275\u0275text(4, "Add something to your cart before checking out.");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(5, "a", 7);
+    \u0275\u0275text(6, "Explore products");
+    \u0275\u0275elementEnd()();
+  }
+}
+function Checkout_Conditional_9_Conditional_2_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 9);
+    \u0275\u0275text(1, " Some items in your cart need attention, so you can't place the order yet. ");
+    \u0275\u0275elementStart(2, "a", 23);
+    \u0275\u0275text(3, "Go to your cart");
+    \u0275\u0275elementEnd()();
+  }
+}
+function Checkout_Conditional_9_Conditional_3_For_2_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "p");
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const message_r3 = ctx.$implicit;
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate(message_r3);
+  }
+}
+function Checkout_Conditional_9_Conditional_3_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 10);
+    \u0275\u0275repeaterCreate(1, Checkout_Conditional_9_Conditional_3_For_2_Template, 2, 1, "p", null, \u0275\u0275repeaterTrackByIdentity);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r0 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance();
+    \u0275\u0275repeater(ctx_r0.errors());
+  }
+}
+function Checkout_Conditional_9_Conditional_7_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "p", 19);
+    \u0275\u0275text(1, "You have no saved address yet.");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(2, "a", 24);
+    \u0275\u0275text(3, "Add an address");
+    \u0275\u0275elementEnd();
+  }
+}
+function Checkout_Conditional_9_Conditional_8_For_2_Conditional_5_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "em", 30);
+    \u0275\u0275text(1, "Default");
+    \u0275\u0275elementEnd();
+  }
+}
+function Checkout_Conditional_9_Conditional_8_For_2_Conditional_10_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275text(0);
+  }
+  if (rf & 2) {
+    const address_r5 = \u0275\u0275nextContext().$implicit;
+    \u0275\u0275textInterpolate1(" ", address_r5.district, ", ");
+  }
+}
+function Checkout_Conditional_9_Conditional_8_For_2_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r4 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "label", 28)(1, "input", 29);
+    \u0275\u0275listener("change", function Checkout_Conditional_9_Conditional_8_For_2_Template_input_change_1_listener() {
+      const address_r5 = \u0275\u0275restoreView(_r4).$implicit;
+      const ctx_r0 = \u0275\u0275nextContext(3);
+      return \u0275\u0275resetView(ctx_r0.selectAddress(address_r5.id));
+    });
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(2, "span", 14)(3, "strong");
+    \u0275\u0275text(4);
+    \u0275\u0275conditionalCreate(5, Checkout_Conditional_9_Conditional_8_For_2_Conditional_5_Template, 2, 0, "em", 30);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(6, "small");
+    \u0275\u0275text(7);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(8, "small");
+    \u0275\u0275text(9);
+    \u0275\u0275conditionalCreate(10, Checkout_Conditional_9_Conditional_8_For_2_Conditional_10_Template, 1, 1);
+    \u0275\u0275text(11);
+    \u0275\u0275elementEnd()()();
+  }
+  if (rf & 2) {
+    const address_r5 = ctx.$implicit;
+    const ctx_r0 = \u0275\u0275nextContext(3);
+    \u0275\u0275classProp("selected", ctx_r0.selectedAddressId() === address_r5.id);
+    \u0275\u0275advance();
+    \u0275\u0275property("checked", ctx_r0.selectedAddressId() === address_r5.id);
+    \u0275\u0275advance(3);
+    \u0275\u0275textInterpolate1(" ", address_r5.label, " ");
+    \u0275\u0275advance();
+    \u0275\u0275conditional(address_r5.is_default ? 5 : -1);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate2("", address_r5.recipient_name, " \xB7 ", address_r5.phone);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1(" ", address_r5.address_line, ", ");
+    \u0275\u0275advance();
+    \u0275\u0275conditional(address_r5.district ? 10 : -1);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1("", address_r5.province, " ");
+  }
+}
+function Checkout_Conditional_9_Conditional_8_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 25);
+    \u0275\u0275repeaterCreate(1, Checkout_Conditional_9_Conditional_8_For_2_Template, 12, 10, "label", 26, _forTrack06);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "a", 27);
+    \u0275\u0275text(4, "Manage addresses");
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r0 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance();
+    \u0275\u0275repeater(ctx_r0.addresses());
+  }
+}
+function Checkout_Conditional_9_For_20_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "label", 15);
+    \u0275\u0275element(1, "input", 31);
+    \u0275\u0275elementStart(2, "span", 14)(3, "strong");
+    \u0275\u0275text(4);
+    \u0275\u0275elementStart(5, "em", 32);
+    \u0275\u0275text(6, "Coming soon");
+    \u0275\u0275elementEnd()()()();
+  }
+  if (rf & 2) {
+    const method_r6 = ctx.$implicit;
+    \u0275\u0275advance(4);
+    \u0275\u0275textInterpolate1("", method_r6, " ");
+  }
+}
+function Checkout_Conditional_9_For_29_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 18)(1, "span");
+    \u0275\u0275text(2);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "strong");
+    \u0275\u0275text(4);
+    \u0275\u0275pipe(5, "currency");
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const line_r7 = ctx.$implicit;
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate2("", line_r7.product.name, " \xD7 ", line_r7.quantity);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate(\u0275\u0275pipeBind1(5, 3, line_r7.line_total));
+  }
+}
+function Checkout_Conditional_9_Conditional_31_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "p", 19);
+    \u0275\u0275text(1, "Calculating delivery...");
+    \u0275\u0275elementEnd();
+  }
+}
+function Checkout_Conditional_9_Conditional_32_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "p", 20);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r0 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate(ctx_r0.quoteError());
+  }
+}
+function Checkout_Conditional_9_Conditional_33_Conditional_0_Conditional_10_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275text(0, " Free ");
+  }
+}
+function Checkout_Conditional_9_Conditional_33_Conditional_0_Conditional_11_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275text(0);
+    \u0275\u0275pipe(1, "currency");
+  }
+  if (rf & 2) {
+    const q_r8 = \u0275\u0275nextContext();
+    \u0275\u0275textInterpolate1(" ", \u0275\u0275pipeBind1(1, 1, q_r8.delivery.fee), " ");
+  }
+}
+function Checkout_Conditional_9_Conditional_33_Conditional_0_Conditional_12_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "p", 33);
+    \u0275\u0275text(1);
+    \u0275\u0275pipe(2, "currency");
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const q_r8 = \u0275\u0275nextContext();
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(" Add ", \u0275\u0275pipeBind1(2, 1, q_r8.delivery.amount_to_free_delivery), " more for free delivery. ");
+  }
+}
+function Checkout_Conditional_9_Conditional_33_Conditional_0_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 18)(1, "span");
+    \u0275\u0275text(2, "Subtotal");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "strong");
+    \u0275\u0275text(4);
+    \u0275\u0275pipe(5, "currency");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(6, "div", 18)(7, "span");
+    \u0275\u0275text(8);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(9, "strong");
+    \u0275\u0275conditionalCreate(10, Checkout_Conditional_9_Conditional_33_Conditional_0_Conditional_10_Template, 1, 0)(11, Checkout_Conditional_9_Conditional_33_Conditional_0_Conditional_11_Template, 2, 3);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275conditionalCreate(12, Checkout_Conditional_9_Conditional_33_Conditional_0_Conditional_12_Template, 3, 3, "p", 33);
+    \u0275\u0275elementStart(13, "div", 34)(14, "span");
+    \u0275\u0275text(15, "Total");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(16, "strong");
+    \u0275\u0275text(17);
+    \u0275\u0275pipe(18, "currency");
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const q_r8 = ctx;
+    \u0275\u0275advance(4);
+    \u0275\u0275textInterpolate(\u0275\u0275pipeBind1(5, 5, q_r8.subtotal));
+    \u0275\u0275advance(4);
+    \u0275\u0275textInterpolate1("Delivery (", q_r8.delivery.zone, ")");
+    \u0275\u0275advance(2);
+    \u0275\u0275conditional(q_r8.delivery.is_free ? 10 : 11);
+    \u0275\u0275advance(2);
+    \u0275\u0275conditional(q_r8.delivery.amount_to_free_delivery !== null ? 12 : -1);
+    \u0275\u0275advance(5);
+    \u0275\u0275textInterpolate(\u0275\u0275pipeBind1(18, 7, q_r8.total));
+  }
+}
+function Checkout_Conditional_9_Conditional_33_Conditional_1_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "p", 19);
+    \u0275\u0275text(1, "Choose an address to see the delivery fee.");
+    \u0275\u0275elementEnd();
+  }
+}
+function Checkout_Conditional_9_Conditional_33_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275conditionalCreate(0, Checkout_Conditional_9_Conditional_33_Conditional_0_Template, 19, 9)(1, Checkout_Conditional_9_Conditional_33_Conditional_1_Template, 2, 0, "p", 19);
+  }
+  if (rf & 2) {
+    let tmp_2_0;
+    const ctx_r0 = \u0275\u0275nextContext(2);
+    \u0275\u0275conditional((tmp_2_0 = ctx_r0.quote()) ? 0 : 1, tmp_2_0);
+  }
+}
+function Checkout_Conditional_9_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r2 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 6)(1, "div", 8);
+    \u0275\u0275conditionalCreate(2, Checkout_Conditional_9_Conditional_2_Template, 4, 0, "div", 9);
+    \u0275\u0275conditionalCreate(3, Checkout_Conditional_9_Conditional_3_Template, 3, 0, "div", 10);
+    \u0275\u0275elementStart(4, "section", 11)(5, "h2");
+    \u0275\u0275text(6, "1. Delivery address");
+    \u0275\u0275elementEnd();
+    \u0275\u0275conditionalCreate(7, Checkout_Conditional_9_Conditional_7_Template, 4, 0)(8, Checkout_Conditional_9_Conditional_8_Template, 5, 0);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(9, "section", 11)(10, "h2");
+    \u0275\u0275text(11, "2. Payment method");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(12, "label", 12);
+    \u0275\u0275element(13, "input", 13);
+    \u0275\u0275elementStart(14, "span", 14)(15, "strong");
+    \u0275\u0275text(16, "Cash on Delivery");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(17, "small");
+    \u0275\u0275text(18, "Pay in cash when your order arrives.");
+    \u0275\u0275elementEnd()()();
+    \u0275\u0275repeaterCreate(19, Checkout_Conditional_9_For_20_Template, 7, 1, "label", 15, \u0275\u0275repeaterTrackByIdentity);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(21, "section", 11)(22, "h2");
+    \u0275\u0275text(23, "3. Note for the courier (optional)");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(24, "textarea", 16);
+    \u0275\u0275listener("input", function Checkout_Conditional_9_Template_textarea_input_24_listener($event) {
+      \u0275\u0275restoreView(_r2);
+      const ctx_r0 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r0.onNoteInput($event));
+    });
+    \u0275\u0275elementEnd()()();
+    \u0275\u0275elementStart(25, "aside", 17)(26, "h2");
+    \u0275\u0275text(27, "Order summary");
+    \u0275\u0275elementEnd();
+    \u0275\u0275repeaterCreate(28, Checkout_Conditional_9_For_29_Template, 6, 5, "div", 18, _forTrack06);
+    \u0275\u0275element(30, "hr");
+    \u0275\u0275conditionalCreate(31, Checkout_Conditional_9_Conditional_31_Template, 2, 0, "p", 19)(32, Checkout_Conditional_9_Conditional_32_Template, 2, 1, "p", 20)(33, Checkout_Conditional_9_Conditional_33_Template, 2, 1);
+    \u0275\u0275elementStart(34, "button", 21);
+    \u0275\u0275listener("click", function Checkout_Conditional_9_Template_button_click_34_listener() {
+      \u0275\u0275restoreView(_r2);
+      const ctx_r0 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r0.placeOrder());
+    });
+    \u0275\u0275text(35);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(36, "p", 22);
+    \u0275\u0275text(37, "You pay in cash when your order arrives.");
+    \u0275\u0275elementEnd()()();
+  }
+  if (rf & 2) {
+    const ctx_r0 = \u0275\u0275nextContext();
+    \u0275\u0275advance(2);
+    \u0275\u0275conditional(ctx_r0.cart.hasIssues() ? 2 : -1);
+    \u0275\u0275advance();
+    \u0275\u0275conditional(ctx_r0.errors().length > 0 ? 3 : -1);
+    \u0275\u0275advance(4);
+    \u0275\u0275conditional(ctx_r0.addresses().length === 0 ? 7 : 8);
+    \u0275\u0275advance(12);
+    \u0275\u0275repeater(\u0275\u0275pureFunction0(7, _c04));
+    \u0275\u0275advance(5);
+    \u0275\u0275property("value", ctx_r0.note());
+    \u0275\u0275advance(4);
+    \u0275\u0275repeater(ctx_r0.cart.lines());
+    \u0275\u0275advance(3);
+    \u0275\u0275conditional(ctx_r0.quoteLoading() ? 31 : ctx_r0.quoteError() ? 32 : 33);
+    \u0275\u0275advance(3);
+    \u0275\u0275property("disabled", !ctx_r0.canPlaceOrder());
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(" ", ctx_r0.placing() ? "Placing order..." : "Place order", " ");
+  }
+}
+var Checkout = class _Checkout {
+  router = inject2(Router);
+  addressService = inject2(AddressService);
+  deliveryService = inject2(DeliveryService);
+  orderService = inject2(OrderService);
+  cart = inject2(CartStore);
+  // Signals: the template updates automatically when they change
+  addresses = signal([], ...ngDevMode ? [{ debugName: "addresses" }] : []);
+  selectedAddressId = signal(null, ...ngDevMode ? [{ debugName: "selectedAddressId" }] : []);
+  quote = signal(null, ...ngDevMode ? [{ debugName: "quote" }] : []);
+  // the fee and total, worked out by the server
+  quoteLoading = signal(false, ...ngDevMode ? [{ debugName: "quoteLoading" }] : []);
+  quoteError = signal("", ...ngDevMode ? [{ debugName: "quoteError" }] : []);
+  pageLoading = signal(true, ...ngDevMode ? [{ debugName: "pageLoading" }] : []);
+  loadError = signal("", ...ngDevMode ? [{ debugName: "loadError" }] : []);
+  note = signal("", ...ngDevMode ? [{ debugName: "note" }] : []);
+  placing = signal(false, ...ngDevMode ? [{ debugName: "placing" }] : []);
+  errors = signal([], ...ngDevMode ? [{ debugName: "errors" }] : []);
+  // One key per visit of this page. If the same key is sent twice
+  // (a double-click or a retry), the server creates only one order.
+  idempotencyKey = this.orderService.newIdempotencyKey();
+  // Used to ignore an old answer when the customer switches address quickly
+  quoteRequest = 0;
+  // The Place order button works only when everything is ready
+  canPlaceOrder = computed(() => this.selectedAddressId() !== null && this.quote() !== null && !this.quoteLoading() && !this.cart.hasIssues() && this.cart.lines().length > 0 && !this.placing(), ...ngDevMode ? [{ debugName: "canPlaceOrder" }] : []);
+  ngOnInit() {
+    forkJoin({
+      cart: this.cart.refresh(),
+      addresses: this.addressService.list()
+    }).pipe(finalize(() => this.pageLoading.set(false))).subscribe({
+      next: ({ addresses }) => {
+        this.addresses.set(addresses);
+        const chosen = addresses.find((address) => address.is_default) ?? addresses[0];
+        if (chosen) {
+          this.selectAddress(chosen.id);
+        }
+      },
+      error: (err) => this.loadError.set(apiErrorMessage(err))
+    });
+  }
+  selectAddress(id) {
+    this.selectedAddressId.set(id);
+    this.loadQuote();
+  }
+  onNoteInput(event) {
+    this.note.set(event.target.value);
+  }
+  // Ask the server for the delivery fee and the total for the chosen address
+  loadQuote() {
+    const addressId = this.selectedAddressId();
+    if (addressId === null || this.cart.lines().length === 0) {
+      this.quote.set(null);
+      return;
+    }
+    const requestNumber = ++this.quoteRequest;
+    this.quoteLoading.set(true);
+    this.quoteError.set("");
+    this.quote.set(null);
+    this.deliveryService.getQuote(addressId).subscribe({
+      next: (quote) => {
+        if (requestNumber === this.quoteRequest) {
+          this.quote.set(quote);
+          this.quoteLoading.set(false);
+        }
+      },
+      error: (err) => {
+        if (requestNumber === this.quoteRequest) {
+          this.quoteError.set(apiErrorMessage(err));
+          this.quoteLoading.set(false);
+        }
+      }
+    });
+  }
+  placeOrder() {
+    const addressId = this.selectedAddressId();
+    if (addressId === null || !this.canPlaceOrder()) {
+      return;
+    }
+    this.placing.set(true);
+    this.errors.set([]);
+    const note = this.note().trim();
+    this.orderService.checkout({
+      address_id: addressId,
+      payment_method: "cod",
+      customer_note: note || void 0,
+      idempotency_key: this.idempotencyKey
+    }).pipe(finalize(() => this.placing.set(false))).subscribe({
+      next: (response) => {
+        const order = response.data;
+        this.cart.refresh().subscribe();
+        import_sweetalert25.default.fire({
+          icon: "success",
+          title: "Order placed!",
+          text: `Your order number is ${order.order_number}. Please have ${this.money(order.total)} ready in cash when it arrives.`,
+          confirmButtonText: "OK"
+        }).then(() => this.router.navigateByUrl("/"));
+      },
+      error: (err) => {
+        this.errors.set(apiErrorMessages(err));
+        this.cart.refresh().subscribe(() => this.loadQuote());
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    });
+  }
+  money(amount) {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD"
+    }).format(amount);
+  }
+  static \u0275fac = function Checkout_Factory(__ngFactoryType__) {
+    return new (__ngFactoryType__ || _Checkout)();
+  };
+  static \u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _Checkout, selectors: [["app-checkout"]], decls: 10, vars: 1, consts: [[1, "checkout-page", "container", "py-4", "py-lg-5"], [1, "checkout-heading"], [1, "eyebrow"], [1, "text-center", "py-5"], [1, "text-center", "py-5", "text-danger"], [1, "checkout-card", "checkout-empty"], [1, "checkout-layout"], ["routerLink", "/product-page", 1, "primary-link"], [1, "checkout-main"], [1, "notice-box"], ["role", "alert", 1, "error-box"], [1, "checkout-card"], [1, "address-option", "selected"], ["type", "radio", "name", "payment", "checked", ""], [1, "address-info"], [1, "address-option", "disabled"], ["rows", "3", "maxlength", "500", "placeholder", "For example: please call before delivery", 3, "input", "value"], [1, "summary-card"], [1, "summary-line"], [1, "muted"], [1, "error-text"], ["type", "button", 1, "place-button", 3, "click", "disabled"], [1, "muted", "small-print"], ["routerLink", "/cart"], ["routerLink", "/account/addresses", 1, "primary-link"], [1, "address-options"], [1, "address-option", 3, "selected"], ["routerLink", "/account/addresses", 1, "small-link"], [1, "address-option"], ["type", "radio", "name", "address", 3, "change", "checked"], [1, "default-badge"], ["type", "radio", "name", "payment", "disabled", ""], [1, "soon-badge"], [1, "free-hint"], [1, "summary-total"]], template: function Checkout_Template(rf, ctx) {
+    if (rf & 1) {
+      \u0275\u0275elementStart(0, "main", 0)(1, "div", 1)(2, "p", 2);
+      \u0275\u0275text(3, "Almost there");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(4, "h1");
+      \u0275\u0275text(5, "Checkout");
+      \u0275\u0275elementEnd()();
+      \u0275\u0275conditionalCreate(6, Checkout_Conditional_6_Template, 2, 0, "p", 3)(7, Checkout_Conditional_7_Template, 2, 1, "p", 4)(8, Checkout_Conditional_8_Template, 7, 0, "section", 5)(9, Checkout_Conditional_9_Template, 38, 8, "div", 6);
+      \u0275\u0275elementEnd();
+    }
+    if (rf & 2) {
+      \u0275\u0275advance(6);
+      \u0275\u0275conditional(ctx.pageLoading() ? 6 : ctx.loadError() ? 7 : ctx.cart.lines().length === 0 ? 8 : 9);
+    }
+  }, dependencies: [RouterLink, CurrencyPipe], styles: ["\n\n.checkout-heading[_ngcontent-%COMP%]   h1[_ngcontent-%COMP%] {\n  color: var(--ink);\n  margin-bottom: 1.5rem;\n}\n.checkout-layout[_ngcontent-%COMP%] {\n  align-items: start;\n  display: grid;\n  gap: 1.5rem;\n  grid-template-columns: minmax(0, 1fr) 340px;\n}\n.checkout-main[_ngcontent-%COMP%] {\n  display: grid;\n  gap: 1.25rem;\n}\n.checkout-card[_ngcontent-%COMP%], \n.summary-card[_ngcontent-%COMP%] {\n  background: var(--surface);\n  border: 1px solid var(--line);\n  border-radius: 14px;\n  box-shadow: 0 8px 22px rgb(23 32 51 / 0.04);\n  padding: 1.4rem;\n}\n.checkout-card[_ngcontent-%COMP%]   h2[_ngcontent-%COMP%], \n.summary-card[_ngcontent-%COMP%]   h2[_ngcontent-%COMP%] {\n  color: var(--ink);\n  font-size: 1.05rem;\n  margin-bottom: 1rem;\n}\n.checkout-empty[_ngcontent-%COMP%] {\n  text-align: center;\n}\n.muted[_ngcontent-%COMP%] {\n  color: var(--muted);\n  font-size: 0.85rem;\n}\n.small-print[_ngcontent-%COMP%] {\n  margin: 0.75rem 0 0;\n  text-align: center;\n}\n.address-options[_ngcontent-%COMP%] {\n  display: grid;\n  gap: 0.75rem;\n  margin-bottom: 0.75rem;\n}\n.address-option[_ngcontent-%COMP%] {\n  align-items: flex-start;\n  border: 1px solid var(--line);\n  border-radius: 10px;\n  cursor: pointer;\n  display: flex;\n  gap: 0.75rem;\n  margin-bottom: 0.6rem;\n  padding: 0.85rem 1rem;\n}\n.address-option.selected[_ngcontent-%COMP%] {\n  background: #fffaf7;\n  border-color: var(--accent);\n}\n.address-option.disabled[_ngcontent-%COMP%] {\n  cursor: not-allowed;\n  opacity: 0.55;\n}\n.address-option[_ngcontent-%COMP%]   input[_ngcontent-%COMP%] {\n  accent-color: var(--accent);\n  margin-top: 0.25rem;\n}\n.address-info[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: column;\n  gap: 0.15rem;\n}\n.address-info[_ngcontent-%COMP%]   strong[_ngcontent-%COMP%] {\n  color: var(--ink);\n  font-size: 0.9rem;\n}\n.address-info[_ngcontent-%COMP%]   small[_ngcontent-%COMP%] {\n  color: var(--muted);\n  font-size: 0.8rem;\n}\n.default-badge[_ngcontent-%COMP%], \n.soon-badge[_ngcontent-%COMP%] {\n  background: #fdeee9;\n  border-radius: 999px;\n  color: var(--accent);\n  font-size: 0.62rem;\n  font-style: normal;\n  font-weight: 700;\n  letter-spacing: 0.06em;\n  margin-left: 0.4rem;\n  padding: 0.2rem 0.5rem;\n  text-transform: uppercase;\n}\n.soon-badge[_ngcontent-%COMP%] {\n  background: #eee;\n  color: var(--muted);\n}\n.checkout-card[_ngcontent-%COMP%]   textarea[_ngcontent-%COMP%] {\n  background: var(--surface);\n  border: 1px solid var(--line);\n  border-radius: 8px;\n  color: var(--ink);\n  font-size: 0.9rem;\n  padding: 0.65rem 0.75rem;\n  width: 100%;\n}\n.checkout-card[_ngcontent-%COMP%]   textarea[_ngcontent-%COMP%]:focus {\n  border-color: var(--accent);\n  outline: none;\n}\n.primary-link[_ngcontent-%COMP%] {\n  background: var(--ink);\n  border-radius: 8px;\n  color: white;\n  display: inline-block;\n  font-size: 0.82rem;\n  font-weight: 700;\n  padding: 0.65rem 1rem;\n  text-decoration: none;\n}\n.small-link[_ngcontent-%COMP%] {\n  color: var(--accent);\n  font-size: 0.8rem;\n  font-weight: 700;\n}\n.notice-box[_ngcontent-%COMP%], \n.error-box[_ngcontent-%COMP%] {\n  border-radius: 10px;\n  font-size: 0.85rem;\n  padding: 0.85rem 1rem;\n}\n.notice-box[_ngcontent-%COMP%] {\n  background: #fff6e5;\n  color: #8a5a00;\n}\n.error-box[_ngcontent-%COMP%] {\n  background: #fdecea;\n  color: #c0392b;\n}\n.error-box[_ngcontent-%COMP%]   p[_ngcontent-%COMP%] {\n  margin: 0 0 0.25rem;\n}\n.error-text[_ngcontent-%COMP%] {\n  color: #c0392b;\n  font-size: 0.85rem;\n}\n.summary-card[_ngcontent-%COMP%] {\n  position: sticky;\n  top: 1rem;\n}\n.summary-line[_ngcontent-%COMP%] {\n  color: var(--ink);\n  display: flex;\n  font-size: 0.85rem;\n  gap: 1rem;\n  justify-content: space-between;\n  margin-bottom: 0.5rem;\n}\n.summary-total[_ngcontent-%COMP%] {\n  border-top: 1px solid var(--line);\n  color: var(--ink);\n  display: flex;\n  font-size: 1.05rem;\n  justify-content: space-between;\n  margin-top: 0.75rem;\n  padding-top: 0.75rem;\n}\n.free-hint[_ngcontent-%COMP%] {\n  color: var(--accent);\n  font-size: 0.78rem;\n  margin: 0 0 0.25rem;\n}\n.place-button[_ngcontent-%COMP%] {\n  background: var(--ink);\n  border: 0;\n  border-radius: 8px;\n  color: white;\n  cursor: pointer;\n  font-size: 0.9rem;\n  font-weight: 700;\n  margin-top: 1.1rem;\n  padding: 0.85rem 1rem;\n  width: 100%;\n}\n.place-button[_ngcontent-%COMP%]:hover:not(:disabled) {\n  background: var(--accent);\n}\n.place-button[_ngcontent-%COMP%]:disabled {\n  cursor: not-allowed;\n  opacity: 0.5;\n}\n@media (max-width: 991px) {\n  .checkout-layout[_ngcontent-%COMP%] {\n    grid-template-columns: 1fr;\n  }\n  .summary-card[_ngcontent-%COMP%] {\n    position: static;\n  }\n}\n/*# sourceMappingURL=checkout.css.map */"] });
+};
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(Checkout, [{
+    type: Component,
+    args: [{ selector: "app-checkout", imports: [CurrencyPipe, RouterLink], template: `<main class="checkout-page container py-4 py-lg-5">\r
+  <div class="checkout-heading">\r
+    <p class="eyebrow">Almost there</p>\r
+    <h1>Checkout</h1>\r
+  </div>\r
+\r
+  @if (pageLoading()) {\r
+    <p class="text-center py-5">Loading your checkout...</p>\r
+  } @else if (loadError()) {\r
+    <p class="text-center py-5 text-danger">{{ loadError() }}</p>\r
+  } @else if (cart.lines().length === 0) {\r
+    <section class="checkout-card checkout-empty">\r
+      <h2>Your cart is empty</h2>\r
+      <p>Add something to your cart before checking out.</p>\r
+      <a routerLink="/product-page" class="primary-link">Explore products</a>\r
+    </section>\r
+  } @else {\r
+    <div class="checkout-layout">\r
+      <div class="checkout-main">\r
+        @if (cart.hasIssues()) {\r
+          <div class="notice-box">\r
+            Some items in your cart need attention, so you can't place the order yet.\r
+            <a routerLink="/cart">Go to your cart</a>\r
+          </div>\r
+        }\r
+\r
+        @if (errors().length > 0) {\r
+          <div class="error-box" role="alert">\r
+            @for (message of errors(); track message) {\r
+              <p>{{ message }}</p>\r
+            }\r
+          </div>\r
+        }\r
+\r
+        <section class="checkout-card">\r
+          <h2>1. Delivery address</h2>\r
+\r
+          @if (addresses().length === 0) {\r
+            <p class="muted">You have no saved address yet.</p>\r
+            <a routerLink="/account/addresses" class="primary-link">Add an address</a>\r
+          } @else {\r
+            <div class="address-options">\r
+              @for (address of addresses(); track address.id) {\r
+                <label class="address-option" [class.selected]="selectedAddressId() === address.id">\r
+                  <input\r
+                    type="radio"\r
+                    name="address"\r
+                    [checked]="selectedAddressId() === address.id"\r
+                    (change)="selectAddress(address.id)"\r
+                  />\r
+                  <span class="address-info">\r
+                    <strong>\r
+                      {{ address.label }}\r
+                      @if (address.is_default) {\r
+                        <em class="default-badge">Default</em>\r
+                      }\r
+                    </strong>\r
+                    <small>{{ address.recipient_name }} \xB7 {{ address.phone }}</small>\r
+                    <small>\r
+                      {{ address.address_line }},\r
+                      @if (address.district) { {{ address.district }}, }{{ address.province }}\r
+                    </small>\r
+                  </span>\r
+                </label>\r
+              }\r
+            </div>\r
+            <a routerLink="/account/addresses" class="small-link">Manage addresses</a>\r
+          }\r
+        </section>\r
+\r
+        <section class="checkout-card">\r
+          <h2>2. Payment method</h2>\r
+\r
+          <label class="address-option selected">\r
+            <input type="radio" name="payment" checked />\r
+            <span class="address-info">\r
+              <strong>Cash on Delivery</strong>\r
+              <small>Pay in cash when your order arrives.</small>\r
+            </span>\r
+          </label>\r
+\r
+          <!-- These are not available yet, so they are switched off and clearly labeled -->\r
+          @for (method of ['KHQR', 'ABA', 'ACLEDA']; track method) {\r
+            <label class="address-option disabled">\r
+              <input type="radio" name="payment" disabled />\r
+              <span class="address-info">\r
+                <strong>{{ method }} <em class="soon-badge">Coming soon</em></strong>\r
+              </span>\r
+            </label>\r
+          }\r
+        </section>\r
+\r
+        <section class="checkout-card">\r
+          <h2>3. Note for the courier (optional)</h2>\r
+          <textarea\r
+            rows="3"\r
+            maxlength="500"\r
+            placeholder="For example: please call before delivery"\r
+            [value]="note()"\r
+            (input)="onNoteInput($event)"\r
+          ></textarea>\r
+        </section>\r
+      </div>\r
+\r
+      <aside class="summary-card">\r
+        <h2>Order summary</h2>\r
+\r
+        @for (line of cart.lines(); track line.id) {\r
+          <div class="summary-line">\r
+            <span>{{ line.product.name }} \xD7 {{ line.quantity }}</span>\r
+            <strong>{{ line.line_total | currency }}</strong>\r
+          </div>\r
+        }\r
+\r
+        <hr />\r
+\r
+                @if (quoteLoading()) {\r
+          <p class="muted">Calculating delivery...</p>\r
+        } @else if (quoteError()) {\r
+          <p class="error-text">{{ quoteError() }}</p>\r
+        } @else {\r
+          @if (quote(); as q) {\r
+            <div class="summary-line">\r
+              <span>Subtotal</span>\r
+              <strong>{{ q.subtotal | currency }}</strong>\r
+            </div>\r
+            <div class="summary-line">\r
+              <span>Delivery ({{ q.delivery.zone }})</span>\r
+              <strong>\r
+                @if (q.delivery.is_free) { Free } @else { {{ q.delivery.fee | currency }} }\r
+              </strong>\r
+            </div>\r
+            @if (q.delivery.amount_to_free_delivery !== null) {\r
+              <p class="free-hint">\r
+                Add {{ q.delivery.amount_to_free_delivery | currency }} more for free delivery.\r
+              </p>\r
+            }\r
+            <div class="summary-total">\r
+              <span>Total</span>\r
+              <strong>{{ q.total | currency }}</strong>\r
+            </div>\r
+          } @else {\r
+            <p class="muted">Choose an address to see the delivery fee.</p>\r
+          }\r
+        }\r
+\r
+        <button type="button" class="place-button" (click)="placeOrder()" [disabled]="!canPlaceOrder()">\r
+          {{ placing() ? 'Placing order...' : 'Place order' }}\r
+        </button>\r
+        <p class="muted small-print">You pay in cash when your order arrives.</p>\r
+      </aside>\r
+    </div>\r
+  }\r
+</main>`, styles: ["/* src/app/checkout/checkout.css */\n.checkout-heading h1 {\n  color: var(--ink);\n  margin-bottom: 1.5rem;\n}\n.checkout-layout {\n  align-items: start;\n  display: grid;\n  gap: 1.5rem;\n  grid-template-columns: minmax(0, 1fr) 340px;\n}\n.checkout-main {\n  display: grid;\n  gap: 1.25rem;\n}\n.checkout-card,\n.summary-card {\n  background: var(--surface);\n  border: 1px solid var(--line);\n  border-radius: 14px;\n  box-shadow: 0 8px 22px rgb(23 32 51 / 0.04);\n  padding: 1.4rem;\n}\n.checkout-card h2,\n.summary-card h2 {\n  color: var(--ink);\n  font-size: 1.05rem;\n  margin-bottom: 1rem;\n}\n.checkout-empty {\n  text-align: center;\n}\n.muted {\n  color: var(--muted);\n  font-size: 0.85rem;\n}\n.small-print {\n  margin: 0.75rem 0 0;\n  text-align: center;\n}\n.address-options {\n  display: grid;\n  gap: 0.75rem;\n  margin-bottom: 0.75rem;\n}\n.address-option {\n  align-items: flex-start;\n  border: 1px solid var(--line);\n  border-radius: 10px;\n  cursor: pointer;\n  display: flex;\n  gap: 0.75rem;\n  margin-bottom: 0.6rem;\n  padding: 0.85rem 1rem;\n}\n.address-option.selected {\n  background: #fffaf7;\n  border-color: var(--accent);\n}\n.address-option.disabled {\n  cursor: not-allowed;\n  opacity: 0.55;\n}\n.address-option input {\n  accent-color: var(--accent);\n  margin-top: 0.25rem;\n}\n.address-info {\n  display: flex;\n  flex-direction: column;\n  gap: 0.15rem;\n}\n.address-info strong {\n  color: var(--ink);\n  font-size: 0.9rem;\n}\n.address-info small {\n  color: var(--muted);\n  font-size: 0.8rem;\n}\n.default-badge,\n.soon-badge {\n  background: #fdeee9;\n  border-radius: 999px;\n  color: var(--accent);\n  font-size: 0.62rem;\n  font-style: normal;\n  font-weight: 700;\n  letter-spacing: 0.06em;\n  margin-left: 0.4rem;\n  padding: 0.2rem 0.5rem;\n  text-transform: uppercase;\n}\n.soon-badge {\n  background: #eee;\n  color: var(--muted);\n}\n.checkout-card textarea {\n  background: var(--surface);\n  border: 1px solid var(--line);\n  border-radius: 8px;\n  color: var(--ink);\n  font-size: 0.9rem;\n  padding: 0.65rem 0.75rem;\n  width: 100%;\n}\n.checkout-card textarea:focus {\n  border-color: var(--accent);\n  outline: none;\n}\n.primary-link {\n  background: var(--ink);\n  border-radius: 8px;\n  color: white;\n  display: inline-block;\n  font-size: 0.82rem;\n  font-weight: 700;\n  padding: 0.65rem 1rem;\n  text-decoration: none;\n}\n.small-link {\n  color: var(--accent);\n  font-size: 0.8rem;\n  font-weight: 700;\n}\n.notice-box,\n.error-box {\n  border-radius: 10px;\n  font-size: 0.85rem;\n  padding: 0.85rem 1rem;\n}\n.notice-box {\n  background: #fff6e5;\n  color: #8a5a00;\n}\n.error-box {\n  background: #fdecea;\n  color: #c0392b;\n}\n.error-box p {\n  margin: 0 0 0.25rem;\n}\n.error-text {\n  color: #c0392b;\n  font-size: 0.85rem;\n}\n.summary-card {\n  position: sticky;\n  top: 1rem;\n}\n.summary-line {\n  color: var(--ink);\n  display: flex;\n  font-size: 0.85rem;\n  gap: 1rem;\n  justify-content: space-between;\n  margin-bottom: 0.5rem;\n}\n.summary-total {\n  border-top: 1px solid var(--line);\n  color: var(--ink);\n  display: flex;\n  font-size: 1.05rem;\n  justify-content: space-between;\n  margin-top: 0.75rem;\n  padding-top: 0.75rem;\n}\n.free-hint {\n  color: var(--accent);\n  font-size: 0.78rem;\n  margin: 0 0 0.25rem;\n}\n.place-button {\n  background: var(--ink);\n  border: 0;\n  border-radius: 8px;\n  color: white;\n  cursor: pointer;\n  font-size: 0.9rem;\n  font-weight: 700;\n  margin-top: 1.1rem;\n  padding: 0.85rem 1rem;\n  width: 100%;\n}\n.place-button:hover:not(:disabled) {\n  background: var(--accent);\n}\n.place-button:disabled {\n  cursor: not-allowed;\n  opacity: 0.5;\n}\n@media (max-width: 991px) {\n  .checkout-layout {\n    grid-template-columns: 1fr;\n  }\n  .summary-card {\n    position: static;\n  }\n}\n/*# sourceMappingURL=checkout.css.map */\n"] }]
+  }], null, null);
+})();
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(Checkout, { className: "Checkout", filePath: "src/app/checkout/checkout.ts", lineNumber: 19 });
+})();
+
 // src/app/app.routes.ts
 var routes = [
   {
@@ -51562,7 +53135,9 @@ var routes = [
   { path: "product-page", component: ProductPage },
   { path: "product/:slug", component: ProductDetail },
   { path: "login", component: Login },
-  { path: "register", component: Register }
+  { path: "register", component: Register },
+  { path: "account/addresses", component: Addresses, canActivate: [authGuard] },
+  { path: "checkout", component: Checkout, canActivate: [authGuard] }
 ];
 
 // src/app/footer/footer.ts
@@ -51665,13 +53240,16 @@ function Navbar_Conditional_33_Template(rf, ctx) {
     \u0275\u0275element(1, "i", 25);
     \u0275\u0275text(2);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "button", 26);
-    \u0275\u0275listener("click", function Navbar_Conditional_33_Template_button_click_3_listener() {
+    \u0275\u0275elementStart(3, "a", 26);
+    \u0275\u0275text(4, "Addresses");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(5, "button", 27);
+    \u0275\u0275listener("click", function Navbar_Conditional_33_Template_button_click_5_listener() {
       \u0275\u0275restoreView(_r3);
       const ctx_r1 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r1.logout());
     });
-    \u0275\u0275text(4, "Logout");
+    \u0275\u0275text(6, "Logout");
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -51683,10 +53261,10 @@ function Navbar_Conditional_33_Template(rf, ctx) {
 }
 function Navbar_Conditional_34_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "a", 27);
+    \u0275\u0275elementStart(0, "a", 28);
     \u0275\u0275text(1, "Login");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(2, "a", 28);
+    \u0275\u0275elementStart(2, "a", 29);
     \u0275\u0275text(3, "Register");
     \u0275\u0275elementEnd();
   }
@@ -51720,7 +53298,7 @@ var Navbar = class _Navbar {
   static \u0275fac = function Navbar_Factory(__ngFactoryType__) {
     return new (__ngFactoryType__ || _Navbar)();
   };
-  static \u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _Navbar, selectors: [["app-navbar"]], decls: 35, vars: 4, consts: [[1, "navbar", "navbar-expand-lg", "shop-nav"], [1, "container"], ["routerLink", "/", 1, "navbar-brand"], [1, "brand-mark"], [1, "brand-dot"], ["type", "button", "data-bs-toggle", "collapse", "data-bs-target", "#navbarContent", 1, "navbar-toggler"], [1, "navbar-toggler-icon"], ["id", "navbarContent", 1, "collapse", "navbar-collapse"], [1, "navbar-nav", "mx-auto", "mb-2", "mb-lg-0"], [1, "nav-item"], ["routerLink", "/", 1, "nav-link", "menu-link"], ["routerLink", "/product-page", 1, "nav-link", "menu-link"], ["routerLink", "/contact", 1, "nav-link", "menu-link"], [1, "nav-actions", "d-flex", "align-items-center", 3, "submit"], [1, "search-box"], ["aria-hidden", "true", 1, "bi", "bi-search"], ["type", "search", "name", "search", "placeholder", "Search products...", "aria-label", "Search products", 3, "ngModelChange", "ngModel"], ["type", "button", "aria-label", "Clear search", 1, "clear-search"], ["routerLink", "/cart", 1, "cart-button"], [1, "bi", "bi-bag", "me-2"], [1, "cart-count"], [1, "auth-actions"], ["type", "button", "aria-label", "Clear search", 1, "clear-search", 3, "click"], [1, "bi", "bi-x"], [1, "user-name"], [1, "bi", "bi-person-circle", "me-1"], ["type", "button", 1, "auth-button", 3, "click"], ["routerLink", "/login", 1, "auth-button"], ["routerLink", "/register", 1, "auth-button", "auth-button-primary"]], template: function Navbar_Template(rf, ctx) {
+  static \u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _Navbar, selectors: [["app-navbar"]], decls: 35, vars: 4, consts: [[1, "navbar", "navbar-expand-lg", "shop-nav"], [1, "container"], ["routerLink", "/", 1, "navbar-brand"], [1, "brand-mark"], [1, "brand-dot"], ["type", "button", "data-bs-toggle", "collapse", "data-bs-target", "#navbarContent", 1, "navbar-toggler"], [1, "navbar-toggler-icon"], ["id", "navbarContent", 1, "collapse", "navbar-collapse"], [1, "navbar-nav", "mx-auto", "mb-2", "mb-lg-0"], [1, "nav-item"], ["routerLink", "/", 1, "nav-link", "menu-link"], ["routerLink", "/product-page", 1, "nav-link", "menu-link"], ["routerLink", "/contact", 1, "nav-link", "menu-link"], [1, "nav-actions", "d-flex", "align-items-center", 3, "submit"], [1, "search-box"], ["aria-hidden", "true", 1, "bi", "bi-search"], ["type", "search", "name", "search", "placeholder", "Search products...", "aria-label", "Search products", 3, "ngModelChange", "ngModel"], ["type", "button", "aria-label", "Clear search", 1, "clear-search"], ["routerLink", "/cart", 1, "cart-button"], [1, "bi", "bi-bag", "me-2"], [1, "cart-count"], [1, "auth-actions"], ["type", "button", "aria-label", "Clear search", 1, "clear-search", 3, "click"], [1, "bi", "bi-x"], [1, "user-name"], [1, "bi", "bi-person-circle", "me-1"], ["routerLink", "/account/addresses", 1, "auth-button"], ["type", "button", 1, "auth-button", 3, "click"], ["routerLink", "/login", 1, "auth-button"], ["routerLink", "/register", 1, "auth-button", "auth-button-primary"]], template: function Navbar_Template(rf, ctx) {
     if (rf & 1) {
       \u0275\u0275elementStart(0, "nav", 0)(1, "div", 1)(2, "a", 2)(3, "span", 3);
       \u0275\u0275text(4, "S");
@@ -51762,7 +53340,7 @@ var Navbar = class _Navbar {
       \u0275\u0275text(31);
       \u0275\u0275elementEnd()()();
       \u0275\u0275elementStart(32, "div", 21);
-      \u0275\u0275conditionalCreate(33, Navbar_Conditional_33_Template, 5, 1)(34, Navbar_Conditional_34_Template, 4, 0);
+      \u0275\u0275conditionalCreate(33, Navbar_Conditional_33_Template, 7, 1)(34, Navbar_Conditional_34_Template, 4, 0);
       \u0275\u0275elementEnd()()()();
     }
     if (rf & 2) {
@@ -51833,6 +53411,7 @@ var Navbar = class _Navbar {
         <span class="user-name">\r
           <i class="bi bi-person-circle me-1"></i>{{ auth.user()?.name ?? 'Account' }}\r
         </span>\r
+        <a routerLink="/account/addresses" class="auth-button">Addresses</a>\r
         <button type="button" class="auth-button" (click)="logout()">Logout</button>\r
       } @else {\r
         <a routerLink="/login" class="auth-button">Login</a>\r
@@ -51854,6 +53433,9 @@ var App = class _App {
   title = "ng_web";
   auth = inject2(AuthService);
   cartStore = inject2(CartStore);
+  addressService = inject2(AddressService);
+  deliveryService = inject2(DeliveryService);
+  orderService = inject2(OrderService);
   // constructor() {
   //   // TEMPORARY TEST: remove after checking the console
   //   this.auth
@@ -51873,6 +53455,10 @@ var App = class _App {
       } });
     }
     this.cartStore.refresh().subscribe();
+    this.deliveryService.getZones().subscribe((zones) => console.log("Zones:", zones.length));
+    this.deliveryService.getProvinces().subscribe((p) => console.log("Provinces:", p.length, p[0]));
+    this.addressService.list().subscribe((a) => console.log("Addresses:", a));
+    this.orderService.list().subscribe((r) => console.log("Orders:", r.meta.total));
   }
   static \u0275fac = function App_Factory(__ngFactoryType__) {
     return new (__ngFactoryType__ || _App)();
@@ -51890,7 +53476,7 @@ var App = class _App {
   }], null, null);
 })();
 (() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(App, { className: "App", filePath: "src/app/app.ts", lineNumber: 14 });
+  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(App, { className: "App", filePath: "src/app/app.ts", lineNumber: 17 });
 })();
 
 // src/app/interceptors/auth.interceptor.ts

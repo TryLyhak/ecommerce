@@ -1,0 +1,243 @@
+.addresses-heading {
+  align-items: flex-end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.addresses-heading h1 {
+  color: var(--ink);
+  margin-bottom: 0.25rem;
+}
+
+.addresses-subtitle {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.limit-note {
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin: -0.75rem 0 1.25rem;
+}
+
+/* The add / edit form */
+.address-form-card,
+.address-card,
+.empty-addresses {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 8px 22px rgb(23 32 51 / 0.04);
+}
+
+.address-form-card {
+  margin-bottom: 1.75rem;
+  padding: 1.5rem;
+}
+
+.address-form-card h2 {
+  color: var(--ink);
+  font-size: 1.15rem;
+  margin-bottom: 1.1rem;
+}
+
+.form-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.form-grid label,
+.check-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.full-row {
+  grid-column: 1 / -1;
+}
+
+.form-grid label span {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.form-grid input,
+.form-grid select,
+.form-grid textarea {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  font-size: 0.9rem;
+  padding: 0.65rem 0.75rem;
+}
+
+.form-grid input:focus,
+.form-grid select:focus,
+.form-grid textarea:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.check-row {
+  align-items: center;
+  flex-direction: row;
+  gap: 0.5rem;
+  margin: 1rem 0 0;
+}
+
+.check-row input {
+  accent-color: var(--accent);
+  height: 17px;
+  width: 17px;
+}
+
+.check-row span {
+  color: var(--ink);
+  font-size: 0.85rem;
+}
+
+.field-error {
+  color: #c0392b;
+  font-size: 0.78rem;
+}
+
+.form-error {
+  background: #fdecea;
+  border-radius: 8px;
+  color: #c0392b;
+  font-size: 0.85rem;
+  margin: 1rem 0 0;
+  padding: 0.7rem 0.85rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+/* Buttons */
+.primary-button {
+  background: var(--ink);
+  border: 0;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.7rem 1.1rem;
+}
+
+.primary-button:hover:not(:disabled) {
+  background: var(--accent);
+}
+
+.ghost-button {
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.7rem 1.1rem;
+}
+
+.primary-button:disabled,
+.ghost-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* The saved addresses */
+.address-list {
+  display: grid;
+  gap: 1.1rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+.address-card {
+  padding: 1.25rem;
+}
+
+.address-top {
+  align-items: center;
+  display: flex;
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
+}
+
+.address-top strong {
+  color: var(--ink);
+}
+
+.default-badge {
+  background: #fdeee9;
+  border-radius: 999px;
+  color: var(--accent);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 0.25rem 0.6rem;
+  text-transform: uppercase;
+}
+
+.address-name {
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin: 0 0 0.3rem;
+}
+
+.address-text {
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin: 0 0 1rem;
+}
+
+.address-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.link-button {
+  background: none;
+  border: 0;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0;
+}
+
+.link-button.danger {
+  color: #c0392b;
+}
+
+.empty-addresses {
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+
+.empty-icon {
+  color: var(--muted);
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 767px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}

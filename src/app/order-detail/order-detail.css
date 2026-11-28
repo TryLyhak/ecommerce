@@ -1,0 +1,210 @@
+.back-link {
+  color: var(--accent);
+  display: inline-block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  margin-bottom: 1.25rem;
+  text-decoration: none;
+}
+
+.thanks-banner {
+  background: #e6f6ec;
+  border-radius: 12px;
+  color: #1e7a45;
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.25rem;
+}
+
+.thanks-banner h2 {
+  font-size: 1.05rem;
+  margin: 0 0 0.25rem;
+}
+
+.thanks-banner p {
+  font-size: 0.88rem;
+  margin: 0;
+}
+
+.order-heading {
+  align-items: flex-start;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.order-heading h1 {
+  color: var(--ink);
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.order-date {
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin: 0.3rem 0 0;
+}
+
+.order-layout {
+  align-items: start;
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: minmax(0, 1fr) 320px;
+}
+
+.order-main,
+.order-side {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.order-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 8px 22px rgb(23 32 51 / 0.04);
+  padding: 1.3rem;
+}
+
+.order-card h2 {
+  color: var(--ink);
+  font-size: 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.item-row {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 0.6rem 0;
+}
+
+.item-row + .item-row {
+  border-top: 1px solid var(--line);
+}
+
+.item-row div {
+  display: flex;
+  flex-direction: column;
+}
+
+.item-row small {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+/* The progress list */
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 1rem;
+}
+
+.timeline li {
+  border-left: 2px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 1rem 1rem;
+  position: relative;
+}
+
+.timeline li::before {
+  background: var(--accent);
+  border-radius: 50%;
+  content: '';
+  height: 10px;
+  left: -6px;
+  position: absolute;
+  top: 4px;
+  width: 10px;
+}
+
+.timeline li:last-child {
+  padding-bottom: 0;
+}
+
+.timeline small {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.timeline-note {
+  color: var(--ink);
+}
+
+.summary-line,
+.summary-total {
+  color: var(--ink);
+  display: flex;
+  font-size: 0.88rem;
+  justify-content: space-between;
+  margin-bottom: 0.45rem;
+}
+
+.summary-total {
+  border-top: 1px solid var(--line);
+  font-size: 1.05rem;
+  margin-top: 0.6rem;
+  padding-top: 0.7rem;
+}
+
+.plain-text {
+  color: var(--ink);
+  font-size: 0.88rem;
+  margin: 0;
+}
+
+.note-text {
+  color: var(--muted);
+  margin-top: 0.7rem;
+}
+
+.cancel-button {
+  background: transparent;
+  border: 1px solid #c0392b;
+  border-radius: 8px;
+  color: #c0392b;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.75rem 1rem;
+  width: 100%;
+}
+
+.cancel-button:hover:not(:disabled) {
+  background: #fdecea;
+}
+
+.cancel-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* The status badge */
+.status-badge {
+  background: #eef1f5;
+  border-radius: 999px;
+  color: #3d4a5c;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 0.3rem 0.75rem;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.status-pending { background: #fff6e5; color: #8a5a00; }
+.status-confirmed,
+.status-processing,
+.status-ready_to_ship { background: #e8f1ff; color: #1d4f9a; }
+.status-shipped { background: #efe9ff; color: #5a3fa0; }
+.status-delivered { background: #e6f6ec; color: #1e7a45; }
+.status-cancelled,
+.status-returned { background: #fdecea; color: #c0392b; }
+
+@media (max-width: 991px) {
+  .order-layout {
+    grid-template-columns: 1fr;
+  }
+}

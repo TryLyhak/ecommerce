@@ -1,0 +1,159 @@
+<main class="addresses-page container py-4 py-lg-5">
+  <div class="addresses-heading">
+    <div>
+      <p class="eyebrow">Your account</p>
+      <h1>My addresses</h1>
+      <p class="addresses-subtitle">Where should we deliver your orders?</p>
+    </div>
+    <button
+      type="button"
+      class="primary-button"
+      (click)="openAdd()"
+      [disabled]="addresses().length >= maxAddresses"
+    >
+      <i class="bi bi-plus-lg"></i> Add address
+    </button>
+  </div>
+
+  @if (addresses().length >= maxAddresses) {
+    <p class="limit-note">You have reached the limit of {{ maxAddresses }} addresses. Delete one to add another.</p>
+  }
+
+  @if (showForm()) {
+    <section class="address-form-card">
+      <h2>{{ editingId() === null ? 'New address' : 'Edit address' }}</h2>
+
+      <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+        <div class="form-grid">
+          <label>
+            <span>Label</span>
+            <input type="text" formControlName="label" placeholder="Home, Office..." />
+            @if (form.controls.label.touched && form.controls.label.invalid) {
+              <small class="field-error">Please give this address a label.</small>
+            }
+            @if (serverError('label')) {
+              <small class="field-error">{{ serverError('label') }}</small>
+            }
+          </label>
+
+          <label>
+            <span>Recipient name</span>
+            <input type="text" formControlName="recipient_name" autocomplete="name" />
+            @if (form.controls.recipient_name.touched && form.controls.recipient_name.invalid) {
+              <small class="field-error">Please enter the recipient's name.</small>
+            }
+            @if (serverError('recipient_name')) {
+              <small class="field-error">{{ serverError('recipient_name') }}</small>
+            }
+          </label>
+
+          <label>
+            <span>Phone</span>
+            <input type="tel" formControlName="phone" autocomplete="tel" placeholder="012 345 678" />
+            @if (form.controls.phone.touched && form.controls.phone.invalid) {
+              <small class="field-error">Please enter a valid phone number, for example 012 345 678.</small>
+            }
+            @if (serverError('phone')) {
+              <small class="field-error">{{ serverError('phone') }}</small>
+            }
+          </label>
+
+          <label>
+            <span>Province</span>
+            <select formControlName="province">
+              <option value="" disabled>Choose a province</option>
+              @for (province of provinces(); track province) {
+                <option [value]="province">{{ province }}</option>
+              }
+            </select>
+            @if (form.controls.province.touched && form.controls.province.invalid) {
+              <small class="field-error">Please choose a province.</small>
+            }
+            @if (serverError('province')) {
+              <small class="field-error">{{ serverError('province') }}</small>
+            }
+          </label>
+
+          <label>
+            <span>District (optional)</span>
+            <input type="text" formControlName="district" />
+            @if (serverError('district')) {
+              <small class="field-error">{{ serverError('district') }}</small>
+            }
+          </label>
+
+          <label class="full-row">
+            <span>Street, house number and landmarks</span>
+            <textarea formControlName="address_line" rows="2"></textarea>
+            @if (form.controls.address_line.touched && form.controls.address_line.invalid) {
+              <small class="field-error">Please enter the street address.</small>
+            }
+            @if (serverError('address_line')) {
+              <small class="field-error">{{ serverError('address_line') }}</small>
+            }
+          </label>
+        </div>
+
+        <!-- A default address cannot be switched off: choose another one as the default instead -->
+        @if (!editingTheDefault() && addresses().length > 0) {
+          <label class="check-row">
+            <input type="checkbox" formControlName="is_default" />
+            <span>Use as my default address</span>
+          </label>
+        }
+
+        @if (formError()) {
+          <p class="form-error" role="alert">{{ formError() }}</p>
+        }
+
+        <div class="form-actions">
+          <button type="submit" class="primary-button" [disabled]="saving()">
+            {{ saving() ? 'Saving...' : 'Save address' }}
+          </button>
+          <button type="button" class="ghost-button" (click)="closeForm()" [disabled]="saving()">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+
+  @if (loading()) {
+    <p class="text-center py-5">Loading your addresses...</p>
+  } @else if (loadError()) {
+    <p class="text-center py-5 text-danger">{{ loadError() }}</p>
+  } @else if (addresses().length === 0 && !showForm()) {
+    <section class="empty-addresses">
+      <div class="empty-icon"><i class="bi bi-geo-alt"></i></div>
+      <h2>No addresses yet</h2>
+      <p>Add your first address to speed up checkout.</p>
+    </section>
+  } @else {
+    <div class="address-list">
+      @for (address of addresses(); track address.id) {
+        <article class="address-card">
+          <div class="address-top">
+            <strong>{{ address.label }}</strong>
+            @if (address.is_default) {
+              <span class="default-badge">Default</span>
+            }
+          </div>
+
+          <p class="address-name">{{ address.recipient_name }} · {{ address.phone }}</p>
+          <p class="address-text">
+            {{ address.address_line }}<br />
+            @if (address.district) { {{ address.district }}, }{{ address.province }}
+          </p>
+
+          <div class="address-actions">
+            @if (!address.is_default) {
+              <button type="button" class="link-button" (click)="setDefault(address)">Set as default</button>
+            }
+            <button type="button" class="link-button" (click)="openEdit(address)">Edit</button>
+            <button type="button" class="link-button danger" (click)="remove(address)">Delete</button>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</main>

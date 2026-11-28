@@ -1,0 +1,107 @@
+<main class="order-page container py-4 py-lg-5">
+  <a routerLink="/orders" class="back-link"><i class="bi bi-arrow-left"></i> All orders</a>
+
+  @if (loading()) {
+    <p class="text-center py-5">Loading your order...</p>
+  } @else if (notFound()) {
+    <section class="order-card text-center">
+      <h2>Order not found</h2>
+      <p>This order does not exist or is not yours.</p>
+    </section>
+  } @else if (errorMessage()) {
+    <p class="text-center py-5 text-danger">{{ errorMessage() }}</p>
+  } @else {
+    @if (order(); as o) {
+      @if (justPlaced() && o.status === 'pending') {
+        <div class="thanks-banner">
+          <h2>Thank you! Your order has been placed.</h2>
+          @if (o.payment_method === 'cod' && o.payment_status === 'pending') {
+            <p>Please have {{ o.total | currency }} ready in cash when it arrives.</p>
+          }
+        </div>
+      }
+
+      <div class="order-heading">
+        <div>
+          <p class="eyebrow">Order</p>
+          <h1>{{ o.order_number }}</h1>
+          <p class="order-date">Placed on {{ o.created_at | date: 'medium' }}</p>
+        </div>
+        <span class="status-badge status-{{ o.status }}">{{ statusLabels[o.status] }}</span>
+      </div>
+
+      <div class="order-layout">
+        <div class="order-main">
+          <section class="order-card">
+            <h2>Items</h2>
+            @for (item of o.items ?? []; track item.id) {
+              <div class="item-row">
+                <div>
+                  <strong>{{ item.product_name }}</strong>
+                  <small>{{ item.unit_price | currency }} × {{ item.quantity }}</small>
+                </div>
+                <strong>{{ item.line_total | currency }}</strong>
+              </div>
+            }
+          </section>
+
+          <section class="order-card">
+            <h2>Order progress</h2>
+            <ol class="timeline">
+              @for (entry of o.status_history ?? []; track $index) {
+                <li>
+                  <strong>{{ statusLabels[entry.to_status] }}</strong>
+                  <small>{{ entry.created_at | date: 'medium' }}</small>
+                  @if (entry.note) {
+                    <small class="timeline-note">{{ entry.note }}</small>
+                  }
+                </li>
+              }
+            </ol>
+          </section>
+        </div>
+
+        <aside class="order-side">
+          <section class="order-card">
+            <h2>Summary</h2>
+            <div class="summary-line"><span>Subtotal</span><span>{{ o.subtotal | currency }}</span></div>
+            <div class="summary-line">
+              <span>Delivery</span>
+              <span>@if (o.delivery_fee === 0) { Free } @else { {{ o.delivery_fee | currency }} }</span>
+            </div>
+            @if (o.discount_total > 0) {
+              <div class="summary-line"><span>Discount</span><span>-{{ o.discount_total | currency }}</span></div>
+            }
+            <div class="summary-total"><span>Total</span><strong>{{ o.total | currency }}</strong></div>
+          </section>
+
+          <section class="order-card">
+            <h2>Payment</h2>
+            <p class="plain-text">
+              {{ methodLabels[o.payment_method] }} ·
+              <strong>{{ paymentLabels[o.payment_status] }}</strong>
+            </p>
+          </section>
+
+          <section class="order-card">
+            <h2>Delivery address</h2>
+            <p class="plain-text">
+              {{ o.shipping.name }} · {{ o.shipping.phone }}<br />
+              {{ o.shipping.address_line }}<br />
+              @if (o.shipping.district) { {{ o.shipping.district }}, }{{ o.shipping.province }}
+            </p>
+            @if (o.customer_note) {
+              <p class="plain-text note-text">Your note: {{ o.customer_note }}</p>
+            }
+          </section>
+
+          @if (o.can_cancel) {
+            <button type="button" class="cancel-button" (click)="cancelOrder()" [disabled]="cancelling()">
+              {{ cancelling() ? 'Cancelling...' : 'Cancel order' }}
+            </button>
+          }
+        </aside>
+      </div>
+    }
+  }
+</main>

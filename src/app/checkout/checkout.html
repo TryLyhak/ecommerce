@@ -1,0 +1,154 @@
+<main class="checkout-page container py-4 py-lg-5">
+  <div class="checkout-heading">
+    <p class="eyebrow">Almost there</p>
+    <h1>Checkout</h1>
+  </div>
+
+  @if (pageLoading()) {
+    <p class="text-center py-5">Loading your checkout...</p>
+  } @else if (loadError()) {
+    <p class="text-center py-5 text-danger">{{ loadError() }}</p>
+  } @else if (cart.lines().length === 0) {
+    <section class="checkout-card checkout-empty">
+      <h2>Your cart is empty</h2>
+      <p>Add something to your cart before checking out.</p>
+      <a routerLink="/product-page" class="primary-link">Explore products</a>
+    </section>
+  } @else {
+    <div class="checkout-layout">
+      <div class="checkout-main">
+        @if (cart.hasIssues()) {
+          <div class="notice-box">
+            Some items in your cart need attention, so you can't place the order yet.
+            <a routerLink="/cart">Go to your cart</a>
+          </div>
+        }
+
+        @if (errors().length > 0) {
+          <div class="error-box" role="alert">
+            @for (message of errors(); track message) {
+              <p>{{ message }}</p>
+            }
+          </div>
+        }
+
+        <section class="checkout-card">
+          <h2>1. Delivery address</h2>
+
+          @if (addresses().length === 0) {
+            <p class="muted">You have no saved address yet.</p>
+            <a routerLink="/account/addresses" class="primary-link">Add an address</a>
+          } @else {
+            <div class="address-options">
+              @for (address of addresses(); track address.id) {
+                <label class="address-option" [class.selected]="selectedAddressId() === address.id">
+                  <input
+                    type="radio"
+                    name="address"
+                    [checked]="selectedAddressId() === address.id"
+                    (change)="selectAddress(address.id)"
+                  />
+                  <span class="address-info">
+                    <strong>
+                      {{ address.label }}
+                      @if (address.is_default) {
+                        <em class="default-badge">Default</em>
+                      }
+                    </strong>
+                    <small>{{ address.recipient_name }} · {{ address.phone }}</small>
+                    <small>
+                      {{ address.address_line }},
+                      @if (address.district) { {{ address.district }}, }{{ address.province }}
+                    </small>
+                  </span>
+                </label>
+              }
+            </div>
+            <a routerLink="/account/addresses" class="small-link">Manage addresses</a>
+          }
+        </section>
+
+        <section class="checkout-card">
+          <h2>2. Payment method</h2>
+
+          <label class="address-option selected">
+            <input type="radio" name="payment" checked />
+            <span class="address-info">
+              <strong>Cash on Delivery</strong>
+              <small>Pay in cash when your order arrives.</small>
+            </span>
+          </label>
+
+          <!-- These are not available yet, so they are switched off and clearly labeled -->
+          @for (method of ['KHQR', 'ABA', 'ACLEDA']; track method) {
+            <label class="address-option disabled">
+              <input type="radio" name="payment" disabled />
+              <span class="address-info">
+                <strong>{{ method }} <em class="soon-badge">Coming soon</em></strong>
+              </span>
+            </label>
+          }
+        </section>
+
+        <section class="checkout-card">
+          <h2>3. Note for the courier (optional)</h2>
+          <textarea
+            rows="3"
+            maxlength="500"
+            placeholder="For example: please call before delivery"
+            [value]="note()"
+            (input)="onNoteInput($event)"
+          ></textarea>
+        </section>
+      </div>
+
+      <aside class="summary-card">
+        <h2>Order summary</h2>
+
+        @for (line of cart.lines(); track line.id) {
+          <div class="summary-line">
+            <span>{{ line.product.name }} × {{ line.quantity }}</span>
+            <strong>{{ line.line_total | currency }}</strong>
+          </div>
+        }
+
+        <hr />
+
+                @if (quoteLoading()) {
+          <p class="muted">Calculating delivery...</p>
+        } @else if (quoteError()) {
+          <p class="error-text">{{ quoteError() }}</p>
+        } @else {
+          @if (quote(); as q) {
+            <div class="summary-line">
+              <span>Subtotal</span>
+              <strong>{{ q.subtotal | currency }}</strong>
+            </div>
+            <div class="summary-line">
+              <span>Delivery ({{ q.delivery.zone }})</span>
+              <strong>
+                @if (q.delivery.is_free) { Free } @else { {{ q.delivery.fee | currency }} }
+              </strong>
+            </div>
+            @if (q.delivery.amount_to_free_delivery !== null) {
+              <p class="free-hint">
+                Add {{ q.delivery.amount_to_free_delivery | currency }} more for free delivery.
+              </p>
+            }
+            <div class="summary-total">
+              <span>Total</span>
+              <strong>{{ q.total | currency }}</strong>
+            </div>
+          } @else {
+            <p class="muted">Choose an address to see the delivery fee.</p>
+          }
+        }
+
+        <button type="button" class="place-button" (click)="placeOrder()" [disabled]="!canPlaceOrder()">
+          {{ placing() ? 'Placing order...' : 'Place order' }}
+        </button>
+        <p class="muted small-print">You pay in cash when your order arrives.</p>
+      </aside>
+    </div>
+  }
+</main>
